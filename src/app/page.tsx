@@ -1,5 +1,8 @@
+"use client";
+
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { motion } from "framer-motion";
 
 export default function Home() {
   return (
@@ -22,41 +25,70 @@ export default function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
             {/* Logo/Brand */}
-            <div className="mb-8">
+            <motion.div
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="mb-8"
+            >
               <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold drop-shadow-2xl mb-2">
                 <span className="text-red-500">Red</span>
                 <span className="text-white">Onion</span>
               </h1>
-              <div className="h-1 w-32 bg-red-500 mx-auto shadow-lg"></div>
-            </div>
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: 128 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="h-1 bg-red-500 mx-auto shadow-lg"
+              ></motion.div>
+            </motion.div>
 
             {/* Tagline */}
-            <p className="text-xl sm:text-2xl lg:text-3xl text-white font-light mb-6 max-w-3xl mx-auto drop-shadow-lg">
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="text-xl sm:text-2xl lg:text-3xl text-white font-light mb-6 max-w-3xl mx-auto drop-shadow-lg"
+            >
               Agencia de Marketing Digital
-            </p>
+            </motion.p>
 
             {/* Description */}
-            <p className="text-lg sm:text-xl text-gray-100 mb-12 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="text-lg sm:text-xl text-gray-100 mb-12 max-w-2xl mx-auto leading-relaxed drop-shadow-md"
+            >
               Creamos conexiones auténticas con tu audiencia mediante
               estrategias innovadoras de engagement, sitios web personalizados y
               gestión de redes sociales.
-            </p>
+            </motion.p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <a
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+            >
+              <motion.a
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 href="#contacto"
-                className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-105 w-full sm:w-auto"
+                className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-xl hover:shadow-2xl w-full sm:w-auto"
               >
                 Comenzar
-              </a>
-              <a
+              </motion.a>
+              <motion.a
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 href="#servicios"
-                className="px-8 py-4 bg-white/95 hover:bg-white text-red-600 font-semibold rounded-lg border-2 border-white transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-105 w-full sm:w-auto backdrop-blur-sm"
+                className="px-8 py-4 bg-white/95 hover:bg-white text-red-600 font-semibold rounded-lg border-2 border-white transition-all duration-200 shadow-xl hover:shadow-2xl w-full sm:w-auto backdrop-blur-sm"
               >
                 Nuestros Servicios
-              </a>
-            </div>
+              </motion.a>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -65,30 +97,51 @@ export default function Home() {
       <section className="py-16 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              whileHover={{ scale: 1.05 }}
+              className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            >
               <h3 className="text-5xl font-bold text-red-600 dark:text-red-500 mb-2">
                 50+
               </h3>
               <p className="text-gray-700 dark:text-gray-300 font-medium">
                 Países Atendidos
               </p>
-            </div>
-            <div className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              whileHover={{ scale: 1.05 }}
+              className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            >
               <h3 className="text-5xl font-bold text-red-600 dark:text-red-500 mb-2">
                 200+
               </h3>
               <p className="text-gray-700 dark:text-gray-300 font-medium">
                 Clientes Globales
               </p>
-            </div>
-            <div className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              whileHover={{ scale: 1.05 }}
+              className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            >
               <h3 className="text-5xl font-bold text-red-600 dark:text-red-500 mb-2">
                 15+
               </h3>
               <p className="text-gray-700 dark:text-gray-300 font-medium">
                 Años de Experiencia
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -96,7 +149,13 @@ export default function Home() {
       {/* Benefits Section */}
       <section id="servicios" className="py-20 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
               ¿Por Qué Elegir RedOnion?
             </h2>
@@ -104,11 +163,18 @@ export default function Home() {
               Ofrecemos soluciones de marketing integrales que impulsan el
               crecimiento y superan las expectativas
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Benefit 1 */}
-            <div className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl hover:shadow-xl transition-shadow duration-300">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              whileHover={{ y: -5 }}
+              className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl hover:shadow-xl transition-shadow duration-300"
+            >
               <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center mb-4">
                 <svg
                   className="w-6 h-6 text-red-600 dark:text-red-400"
@@ -131,10 +197,17 @@ export default function Home() {
                 Acceso a mercados en más de 50 países con estrategias
                 localizadas que resuenan con audiencias diversas.
               </p>
-            </div>
+            </motion.div>
 
             {/* Benefit 2 */}
-            <div className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl hover:shadow-xl transition-shadow duration-300">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              whileHover={{ y: -5 }}
+              className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl hover:shadow-xl transition-shadow duration-300"
+            >
               <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center mb-4">
                 <svg
                   className="w-6 h-6 text-red-600 dark:text-red-400"
@@ -157,10 +230,17 @@ export default function Home() {
                 Análisis avanzados y conocimientos que convierten datos en
                 estrategias accionables para un ROI medible.
               </p>
-            </div>
+            </motion.div>
 
             {/* Benefit 3 */}
-            <div className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl hover:shadow-xl transition-shadow duration-300">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              whileHover={{ y: -5 }}
+              className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl hover:shadow-xl transition-shadow duration-300"
+            >
               <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center mb-4">
                 <svg
                   className="w-6 h-6 text-red-600 dark:text-red-400"
@@ -183,10 +263,17 @@ export default function Home() {
                 Del concepto al lanzamiento en tiempo récord sin comprometer la
                 calidad o efectividad.
               </p>
-            </div>
+            </motion.div>
 
             {/* Benefit 4 */}
-            <div className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl hover:shadow-xl transition-shadow duration-300">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              whileHover={{ y: -5 }}
+              className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl hover:shadow-xl transition-shadow duration-300"
+            >
               <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center mb-4">
                 <svg
                   className="w-6 h-6 text-red-600 dark:text-red-400"
@@ -209,10 +296,17 @@ export default function Home() {
                 Profesionales experimentados en marketing con profunda
                 experiencia en diversas industrias y canales.
               </p>
-            </div>
+            </motion.div>
 
             {/* Benefit 5 */}
-            <div className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl hover:shadow-xl transition-shadow duration-300">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              whileHover={{ y: -5 }}
+              className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl hover:shadow-xl transition-shadow duration-300"
+            >
               <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center mb-4">
                 <svg
                   className="w-6 h-6 text-red-600 dark:text-red-400"
@@ -235,10 +329,17 @@ export default function Home() {
                 Ideas frescas y audaces que capturan la atención y crean
                 impresiones de marca duraderas.
               </p>
-            </div>
+            </motion.div>
 
             {/* Benefit 6 */}
-            <div className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl hover:shadow-xl transition-shadow duration-300">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              whileHover={{ y: -5 }}
+              className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl hover:shadow-xl transition-shadow duration-300"
+            >
               <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center mb-4">
                 <svg
                   className="w-6 h-6 text-red-600 dark:text-red-400"
@@ -261,7 +362,7 @@ export default function Home() {
                 Maximiza tu presupuesto de marketing con estrategias que ofrecen
                 un valor y retornos excepcionales.
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -269,18 +370,31 @@ export default function Home() {
       {/* How It Works Section */}
       <section id="proceso" className="py-20 bg-gray-50 dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
               Cómo Funciona
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
               Nuestro proceso probado asegura tu éxito desde el primer día
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Step 1 */}
-            <div className="text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              whileHover={{ scale: 1.05 }}
+              className="text-center"
+            >
               <div className="w-16 h-16 bg-red-600 dark:bg-red-500 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                 1
               </div>
@@ -291,10 +405,17 @@ export default function Home() {
                 Nos sumergimos en tu negocio, audiencia y objetivos para
                 entender qué te hace único.
               </p>
-            </div>
+            </motion.div>
 
             {/* Step 2 */}
-            <div className="text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              whileHover={{ scale: 1.05 }}
+              className="text-center"
+            >
               <div className="w-16 h-16 bg-red-600 dark:bg-red-500 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                 2
               </div>
@@ -305,10 +426,17 @@ export default function Home() {
                 Estrategias de marketing personalizadas adaptadas a tus
                 objetivos y mercados meta en todo el mundo.
               </p>
-            </div>
+            </motion.div>
 
             {/* Step 3 */}
-            <div className="text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              whileHover={{ scale: 1.05 }}
+              className="text-center"
+            >
               <div className="w-16 h-16 bg-red-600 dark:bg-red-500 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                 3
               </div>
@@ -319,10 +447,17 @@ export default function Home() {
                 Lanzamos campañas convincentes a través de múltiples canales con
                 precisión y creatividad.
               </p>
-            </div>
+            </motion.div>
 
             {/* Step 4 */}
-            <div className="text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              whileHover={{ scale: 1.05 }}
+              className="text-center"
+            >
               <div className="w-16 h-16 bg-red-600 dark:bg-red-500 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                 4
               </div>
@@ -333,7 +468,7 @@ export default function Home() {
                 Monitoreo y optimización continua para maximizar el rendimiento
                 y el ROI.
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -341,18 +476,31 @@ export default function Home() {
       {/* Pricing Section */}
       <section id="precios" className="py-20 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
               Planes de Precios Flexibles
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
               Elige el plan que se ajuste a las necesidades de tu negocio
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Starter Plan */}
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 border-2 border-gray-200 dark:border-gray-700 hover:border-red-600 dark:hover:border-red-500 transition-colors duration-300">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              whileHover={{ y: -10 }}
+              className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 border-2 border-gray-200 dark:border-gray-700 hover:border-red-600 dark:hover:border-red-500 transition-colors duration-300"
+            >
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                 Inicial
               </h3>
@@ -445,10 +593,17 @@ export default function Home() {
               >
                 Comenzar
               </a>
-            </div>
+            </motion.div>
 
             {/* Professional Plan - Featured */}
-            <div className="bg-red-50 dark:bg-red-900/20 rounded-2xl p-8 border-2 border-red-600 dark:border-red-500 relative transform md:scale-105 shadow-xl">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              whileHover={{ y: -10, scale: 1.02 }}
+              className="bg-red-50 dark:bg-red-900/20 rounded-2xl p-8 border-2 border-red-600 dark:border-red-500 relative transform md:scale-105 shadow-xl"
+            >
               <div className="absolute top-0 right-0 bg-red-600 dark:bg-red-500 text-white px-4 py-1 rounded-bl-lg rounded-tr-lg text-sm font-semibold">
                 POPULAR
               </div>
@@ -562,10 +717,17 @@ export default function Home() {
               >
                 Comenzar
               </a>
-            </div>
+            </motion.div>
 
             {/* Enterprise Plan */}
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 border-2 border-gray-200 dark:border-gray-700 hover:border-red-600 dark:hover:border-red-500 transition-colors duration-300">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              whileHover={{ y: -10 }}
+              className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 border-2 border-gray-200 dark:border-gray-700 hover:border-red-600 dark:hover:border-red-500 transition-colors duration-300"
+            >
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                 Empresarial
               </h3>
@@ -675,7 +837,7 @@ export default function Home() {
               >
                 Contactar Ventas
               </a>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -683,7 +845,13 @@ export default function Home() {
       {/* Testimonials Section */}
       <section id="testimonios" className="py-20 bg-gray-50 dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
               Lo Que Dicen Nuestros Clientes
             </h2>
@@ -691,11 +859,18 @@ export default function Home() {
               No solo confíes en nuestra palabra - escucha a las empresas que
               hemos ayudado a crecer
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Testimonial 1 */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              whileHover={{ y: -5 }}
+              className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg"
+            >
               <div className="flex items-center mb-4">
                 {[...Array(5)].map((_, i) => (
                   <svg
@@ -726,10 +901,17 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Testimonial 2 */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              whileHover={{ y: -5 }}
+              className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg"
+            >
               <div className="flex items-center mb-4">
                 {[...Array(5)].map((_, i) => (
                   <svg
@@ -760,10 +942,17 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Testimonial 3 */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg">
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              whileHover={{ y: -5 }}
+              className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg"
+            >
               <div className="flex items-center mb-4">
                 {[...Array(5)].map((_, i) => (
                   <svg
@@ -794,7 +983,7 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -805,27 +994,49 @@ export default function Home() {
         className="py-20 bg-gradient-to-br from-red-600 to-orange-600 dark:from-red-700 dark:to-orange-700"
       >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
+          <motion.h2
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-4xl sm:text-5xl font-bold text-white mb-6"
+          >
             ¿Listo Para Hacer Crecer Tu Negocio?
-          </h2>
-          <p className="text-xl text-red-50 mb-8 max-w-2xl mx-auto">
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-xl text-red-50 mb-8 max-w-2xl mx-auto"
+          >
             Hablemos sobre cómo RedOnion puede ayudarte a alcanzar tus objetivos
             de marketing y dominar tu mercado.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          >
+            <motion.a
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               href="mailto:hello@redonion.com"
               className="px-8 py-4 bg-white hover:bg-gray-100 text-red-600 font-semibold rounded-lg transition-colors duration-200 shadow-xl hover:shadow-2xl w-full sm:w-auto"
             >
               Agendar una Consulta
-            </a>
-            <a
+            </motion.a>
+            <motion.a
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               href="tel:+1234567890"
               className="px-8 py-4 bg-transparent hover:bg-red-700 text-white font-semibold rounded-lg border-2 border-white transition-colors duration-200 w-full sm:w-auto"
             >
               Llámanos Ahora
-            </a>
-          </div>
+            </motion.a>
+          </motion.div>
         </div>
       </section>
 
