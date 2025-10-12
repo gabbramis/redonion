@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /B C:UsersADMINDesktopprojectsredonion)",
+      "Bash(dir /B C:UsersADMINDesktopprojectsredonionpublic)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
