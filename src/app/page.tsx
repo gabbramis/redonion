@@ -709,9 +709,9 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-6 italic">
-                "RedOnion transformó nuestra presencia de marca en Europa. Su
+                RedOnion transformó nuestra presencia de marca en Europa. Su
                 enfoque estratégico aumentó nuestra cuota de mercado un 45% en
-                solo 6 meses. ¡Trabajo excepcional!"
+                solo 6 meses. ¡Trabajo excepcional!
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center text-red-600 dark:text-red-400 font-bold text-lg mr-4">
@@ -743,9 +743,9 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-6 italic">
-                "Trabajar con RedOnion ha sido un cambio radical. La creatividad
+                Trabajar con RedOnion ha sido un cambio radical. La creatividad
                 de su equipo y el enfoque basado en datos entregaron campañas
-                que superaron todas nuestras expectativas."
+                que superaron todas nuestras expectativas.
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center text-red-600 dark:text-red-400 font-bold text-lg mr-4">
@@ -777,9 +777,9 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-6 italic">
-                "El ROI que hemos visto de las campañas de RedOnion es
-                increíble. Entienden los mercados internacionales como ninguna
-                otra agencia con la que hayamos trabajado."
+                El ROI que hemos visto de las campañas de RedOnion es increíble.
+                Entienden los mercados internacionales como ninguna otra agencia
+                con la que hayamos trabajado.
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center text-red-600 dark:text-red-400 font-bold text-lg mr-4">
