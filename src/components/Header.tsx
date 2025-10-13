@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Header() {
   return (
@@ -7,18 +8,20 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <a href="#" className="flex items-center gap-3">
-              <Image
-                src="/onion-logo.png"
-                alt="RedOnion Logo"
-                width={40}
-                height={40}
-                className="object-contain"
-              />
+            <Link href="/login" className="flex items-center gap-3 group">
+              <div className="transition-transform duration-300 group-hover:scale-110">
+                <Image
+                  src="/onion-logo.png"
+                  alt="RedOnion Logo"
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                />
+              </div>
               <span className="text-2xl font-bold text-red-600 dark:text-red-500">
                 RedOnion
               </span>
-            </a>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
