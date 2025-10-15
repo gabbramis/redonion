@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
+import { VisaIcon } from "@/components/ui/icons/brandico-visa";
+import { MastercardIcon } from "@/components/ui/icons/brandico-mastercard";
 
 interface Plan {
   id: string;
@@ -14,18 +16,10 @@ interface Plan {
   features: string[];
   price: number;
   annualPrice: number;
-  duration: string;
   upgrade?: {
     name: string;
     price: number;
   };
-}
-
-interface Extra {
-  id: string;
-  planId: string;
-  name: string;
-  price: number;
 }
 
 interface CartItem {
@@ -41,7 +35,8 @@ const plans: Plan[] = [
     id: "basico",
     name: "Plan Básico",
     subtitle: "Fundación Digital",
-    description: "Ideal para emprendedores o negocios locales que necesitan una presencia profesional online.",
+    description:
+      "Ideal para emprendedores o negocios locales que necesitan una presencia profesional online.",
     features: [
       "Sitio web personalizado (5 secciones: inicio, sobre nosotros, servicios, contacto, blog)",
       "Optimización móvil y carga rápida",
@@ -51,7 +46,6 @@ const plans: Plan[] = [
     ],
     price: 149,
     annualPrice: 126.65,
-    duration: "6–12 meses",
     upgrade: {
       name: "SEO optimizado para mejorar posicionamiento en buscadores",
       price: 20,
@@ -61,7 +55,8 @@ const plans: Plan[] = [
     id: "estandar",
     name: "Plan Estándar",
     subtitle: "Crecimiento y Posicionamiento",
-    description: "Diseñado para pymes y negocios en expansión que buscan más visibilidad, tráfico y ventas.",
+    description:
+      "Diseñado para pymes y negocios en expansión que buscan más visibilidad, tráfico y ventas.",
     features: [
       "Todo lo del Plan Básico",
       "Gestión de 2 redes sociales (Instagram + Facebook o TikTok)",
@@ -72,7 +67,6 @@ const plans: Plan[] = [
     ],
     price: 249,
     annualPrice: 211.65,
-    duration: "12 meses",
     upgrade: {
       name: "Maximizador de tráfico pago: aumento de publicaciones diarias + campañas publicitarias gestionadas",
       price: 50,
@@ -82,7 +76,8 @@ const plans: Plan[] = [
     id: "premium",
     name: "Plan Premium",
     subtitle: "Automatización y Crecimiento Inteligente",
-    description: "Ideal para marcas consolidadas que buscan automatizar, escalar y destacarse.",
+    description:
+      "Ideal para marcas consolidadas que buscan automatizar, escalar y destacarse.",
     features: [
       "Todo lo del Plan Estándar",
       "Gestión de 3+ redes sociales",
@@ -95,7 +90,6 @@ const plans: Plan[] = [
     ],
     price: 649,
     annualPrice: 551.65,
-    duration: "Continuo con revisión trimestral",
     upgrade: {
       name: "Publicidad con influencers locales seleccionados según tu público y nicho",
       price: 250,
@@ -110,12 +104,15 @@ export default function ClientDashboard() {
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [selectedExtras, setSelectedExtras] = useState<Set<string>>(new Set());
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [expandedPlans, setExpandedPlans] = useState<Set<string>>(new Set());
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) {
         router.push("/login");
@@ -176,6 +173,22 @@ export default function ClientDashboard() {
     return cart.reduce((sum, item) => sum + item.price, 0);
   };
 
+  const toggleExpandPlan = (planId: string) => {
+    const newExpanded = new Set(expandedPlans);
+    if (newExpanded.has(planId)) {
+      newExpanded.delete(planId);
+    } else {
+      newExpanded.add(planId);
+    }
+    setExpandedPlans(newExpanded);
+  };
+
+  const handleProceedToPayment = () => {
+    // For now, simulate payment and redirect to panel
+    // Later this will integrate with actual payment gateways
+    router.push("/dashboard/client/panel");
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -203,13 +216,19 @@ export default function ClientDashboard() {
                   <span className="text-red-500">Red</span>
                   <span className="text-gray-900 dark:text-white">Onion</span>
                 </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Selecciona tu Plan</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Selecciona tu Plan
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.email}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Cliente</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  {user?.email}
+                </p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Cliente
+                </p>
               </div>
               <button
                 onClick={handleLogout}
@@ -235,7 +254,8 @@ export default function ClientDashboard() {
             ¡Bienvenido! 👋
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400">
-            Selecciona el plan perfecto para tu negocio y personalízalo con extras.
+            Selecciona el plan perfecto para tu negocio y personalízalo con
+            extras.
           </p>
         </motion.div>
 
@@ -300,8 +320,16 @@ export default function ClientDashboard() {
                       </p>
                     </div>
                     {selectedPlan?.id === plan.id && (
-                      <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      <svg
+                        className="w-6 h-6 text-red-600"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     )}
                   </div>
@@ -321,14 +349,25 @@ export default function ClientDashboard() {
                     </div>
                     {billing === "annual" && (
                       <p className="text-xs text-green-600 dark:text-green-500 mt-1">
-                        Ahorro anual: ${((plan.price - plan.annualPrice) * 12).toFixed(2)} USD
+                        Ahorro anual: $
+                        {((plan.price - plan.annualPrice) * 12).toFixed(2)} USD
                       </p>
                     )}
                   </div>
 
                   <div className="space-y-2 mb-4">
-                    {plan.features.slice(0, 3).map((feature, idx) => (
-                      <div key={idx} className="flex items-start gap-2">
+                    {(expandedPlans.has(plan.id)
+                      ? plan.features
+                      : plan.features.slice(0, 3)
+                    ).map((feature, idx) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex items-start gap-2"
+                      >
                         <svg
                           className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5"
                           fill="none"
@@ -345,16 +384,56 @@ export default function ClientDashboard() {
                         <span className="text-sm text-gray-700 dark:text-gray-300">
                           {feature}
                         </span>
-                      </div>
+                      </motion.div>
                     ))}
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                      + {plan.features.length - 3} características más
-                    </p>
-                  </div>
 
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Duración: {plan.duration}
-                  </p>
+                    {plan.features.length > 3 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleExpandPlan(plan.id);
+                        }}
+                        className="text-xs text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400 font-medium mt-2 flex items-center gap-1 transition-colors"
+                      >
+                        {expandedPlans.has(plan.id) ? (
+                          <>
+                            Ver menos
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 15l7-7 7 7"
+                              />
+                            </svg>
+                          </>
+                        ) : (
+                          <>
+                            Ver más ({plan.features.length - 3} características
+                            más)
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 9l-7 7-7-7"
+                              />
+                            </svg>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -461,15 +540,20 @@ export default function ClientDashboard() {
 
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mb-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Subtotal
+                      </span>
                       <span className="font-semibold text-gray-900 dark:text-white">
                         ${calculateTotal()}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-lg font-bold">
-                      <span className="text-gray-900 dark:text-white">Total</span>
+                      <span className="text-gray-900 dark:text-white">
+                        Total
+                      </span>
                       <span className="text-red-600 dark:text-red-500">
-                        ${calculateTotal()} USD/{billing === "monthly" ? "mes" : "año"}
+                        ${calculateTotal()} USD/
+                        {billing === "monthly" ? "mes" : "año"}
                       </span>
                     </div>
                   </div>
@@ -480,36 +564,43 @@ export default function ClientDashboard() {
                       Método de Pago
                     </h4>
                     <div className="space-y-2">
-                      <button className="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
-                        </svg>
-                        Mercado Pago
+                      <button className="w-full px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center">
+                        <Image
+                          src="/mercadopago-logo.png"
+                          alt="Mercado Pago"
+                          width={120}
+                          height={32}
+                          className="h-8 object-contain"
+                        />
                       </button>
                       <button
                         disabled
                         className="w-full px-4 py-3 bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-medium rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
                       >
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <svg
+                          className="w-5 h-5"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
                           <path d="M20.067 8.478c.492.88.556 2.014.3 3.327-.74 3.806-3.276 5.12-6.514 5.12h-.5a.805.805 0 00-.794.68l-.04.22-.63 3.993-.028.15a.804.804 0 01-.793.679H8.25c-.38 0-.684-.29-.72-.663l-.03-.205L6.25 9.75l.02-.137a.805.805 0 01.793-.68h2.647c3.628 0 6.093-1.393 6.925-5.544.11-.554.15-1.003.15-1.39 0-.75-.195-1.317-.59-1.69-.4-.377-.973-.565-1.696-.565H6.947a.805.805 0 00-.794.68l-1.14 7.244-.03.205c0 .443.36.803.804.803h2.647c3.628 0 6.093-1.393 6.925-5.544z" />
                         </svg>
                         PayPal
-                        <span className="text-xs">(Próximamente)</span>
                       </button>
                       <button
                         disabled
                         className="w-full px-4 py-3 bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-medium rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
                       >
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M16.624 13.9202C16.7031 13.0853 17.5291 12.4334 18.8134 12.4334C20.1002 12.4334 21.0652 13.0934 21.0652 13.9448C21.0652 14.6192 20.4835 15.0818 19.5286 15.3063V15.3741C20.6869 15.5731 21.4013 16.0766 21.4013 16.9236C21.4013 17.8768 20.3283 18.5858 18.7967 18.5858C17.2651 18.5858 16.1921 17.8931 16.1921 17.0542C16.1921 16.4023 16.6495 15.9661 17.3844 15.7416V15.6738C16.6741 15.4666 16.2167 14.9712 16.2167 14.3274C16.2167 13.5431 16.8419 12.9827 17.7133 12.7909V12.723C16.9549 12.5157 16.4974 11.9471 16.4974 11.2463C16.4974 10.1879 17.5454 9.4707 18.8134 9.4707C20.0814 9.4707 21.1294 10.1879 21.1294 11.2463C21.1294 11.9471 20.672 12.5157 19.9136 12.723V12.7909C20.7849 12.9827 21.4102 13.5431 21.4102 14.3274C21.4102 14.9712 20.9527 15.4666 20.2424 15.6738V15.7416C20.9773 15.9661 21.4348 16.4023 21.4348 17.0542Z" />
-                        </svg>
-                        Binance
-                        <span className="text-xs">(Próximamente)</span>
+                        <VisaIcon className="w-5 h-5" />
+                        <span>Visa / Mastercard</span>
+                        <MastercardIcon className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
 
-                  <button className="w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl">
+                  <button
+                    onClick={handleProceedToPayment}
+                    className="w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl"
+                  >
                     Proceder al Pago
                   </button>
 

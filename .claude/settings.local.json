@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(dir /B C:UsersADMINDesktopprojectsredonion)",
-      "Bash(dir /B C:UsersADMINDesktopprojectsredonionpublic)"
+      "Bash(dir /B C:UsersADMINDesktopprojectsredonionpublic)",
+      "Bash(dir /B C:UsersADMINDesktopprojectsredonionsrcappdashboardadminclients)",
+      "Bash(dir /B srcappdashboardadminclients)",
+      "Bash(npm uninstall:*)",
+      "Bash(pnpm run build)"
     ],
     "deny": [],
     "ask": []
