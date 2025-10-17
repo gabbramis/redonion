@@ -12,6 +12,9 @@ interface Client {
   plan_name: string;
   plan_tier: string;
   status: string;
+  subscription_id: string | null;
+  subscription_start: string | null;
+  subscription_end: string | null;
   created_at: string;
 }
 
@@ -25,10 +28,10 @@ export default function ClientsPage() {
     const fetchClients = async () => {
       console.log('🔄 [Clientes Page] Fetching clients from Supabase...');
 
-      // Fetch all client plans from user_plans
+      // Fetch all client plans from user_plans with subscription details
       const { data: plansData, error } = await supabase
         .from('user_plans')
-        .select('user_id, plan_name, plan_tier, status, created_at')
+        .select('user_id, plan_name, plan_tier, status, subscription_id, subscription_start, subscription_end, created_at')
         .order('created_at', { ascending: false });
 
       console.log('📊 [Clientes Page] Query result:', { plansData, error });
@@ -45,6 +48,9 @@ export default function ClientsPage() {
           plan_name: plan.plan_name,
           plan_tier: plan.plan_tier || 'N/A',
           status: plan.status,
+          subscription_id: plan.subscription_id,
+          subscription_start: plan.subscription_start ? new Date(plan.subscription_start).toLocaleDateString('es-ES') : null,
+          subscription_end: plan.subscription_end ? new Date(plan.subscription_end).toLocaleDateString('es-ES') : null,
           created_at: new Date(plan.created_at).toLocaleDateString('es-ES'),
         }));
         setClients(clientsList);
@@ -187,7 +193,10 @@ export default function ClientsPage() {
                   Nivel
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Estado
+                  Estado Pago
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Suscripción
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Fecha Registro
@@ -200,7 +209,7 @@ export default function ClientsPage() {
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {filteredClients.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
+                  <td colSpan={7} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center gap-3">
                       <svg
                         className="w-12 h-12 text-gray-400"
@@ -256,6 +265,30 @@ export default function ClientsPage() {
                       >
                         {client.status}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {client.subscription_id ? (
+                        <div className="text-xs">
+                          <div className="flex items-center gap-1 text-green-600 dark:text-green-400 font-medium mb-1">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                            </svg>
+                            Pagado
+                          </div>
+                          {client.subscription_end && (
+                            <p className="text-gray-500 dark:text-gray-400">
+                              Vence: {client.subscription_end}
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 text-yellow-600 dark:text-yellow-400 text-xs font-medium">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/>
+                          </svg>
+                          Sin pagar
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {client.created_at}
