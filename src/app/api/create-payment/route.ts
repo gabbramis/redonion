@@ -17,49 +17,11 @@ export async function POST(request: Request) {
     // Remove trailing slash from app URL to avoid double slashes
     const appUrl = (process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/$/, '');
 
-    // Step 1: Create the subscription plan
-    const planData = {
-      reason: planName,
-      auto_recurring: {
-        frequency: frequency,
-        frequency_type: frequencyType,
-        transaction_amount: priceInUYU,
-        currency_id: process.env.MP_CURRENCY || "UYU",
-      },
-      back_url: `${appUrl}/payment/success`,
-    };
-
-    console.log("📤 Creating plan:", JSON.stringify(planData, null, 2));
-
-    const planResponse = await fetch("https://api.mercadopago.com/preapproval_plan", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.MP_ACCESS_TOKEN}`,
-      },
-      body: JSON.stringify(planData),
-    });
-
-    const planResponseData = await planResponse.json();
-    console.log("📥 MercadoPago plan response:", JSON.stringify(planResponseData, null, 2));
-
-    if (!planResponse.ok) {
-      console.error("❌ MercadoPago plan error:", planResponseData);
-      return NextResponse.json(
-        {
-          error: "Error creating plan",
-          details: planResponseData,
-        },
-        { status: planResponse.status }
-      );
-    }
-
-    // Step 2: Create subscription with the plan and user reference
+    // Create subscription directly (without plan template)
     const subscriptionData = {
       reason: planName,
       external_reference: `${userId}-${planId}`, // Format: userId-planTier for webhook processing
       payer_email: userEmail,
-      preapproval_plan_id: planResponseData.id,
       auto_recurring: {
         frequency: frequency,
         frequency_type: frequencyType,
