@@ -19,8 +19,6 @@ export async function POST(request: Request) {
 
     const planData = {
       reason: planName,
-      external_reference: `${userId}-${planId}`,
-      payer_email: userEmail,
       auto_recurring: {
         frequency: frequency,
         frequency_type: frequencyType,
