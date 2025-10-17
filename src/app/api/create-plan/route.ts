@@ -14,6 +14,9 @@ export async function POST(request: Request) {
     const priceInUYU = await convertUSDtoUYU(totalPrice);
     console.log(`💵 Converted: $${totalPrice} USD = $${priceInUYU} UYU`);
 
+    // Remove trailing slash from app URL to avoid double slashes
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/$/, '');
+
     // Create plan using direct API call with UYU pricing
     const planData = {
       reason: planName,
@@ -23,7 +26,7 @@ export async function POST(request: Request) {
         transaction_amount: priceInUYU,
         currency_id: process.env.MP_CURRENCY || "UYU",
       },
-      back_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/success`,
+      back_url: `${appUrl}/payment/success`,
     };
 
     console.log("📤 Creating plan:", JSON.stringify(planData, null, 2));

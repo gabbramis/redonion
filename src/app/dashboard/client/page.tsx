@@ -40,17 +40,17 @@ const plans: Plan[] = [
     name: "Plan Test",
     subtitle: "Solo para Pruebas",
     description:
-      "Plan de prueba de 5 UYU para verificar que todo funciona correctamente.",
+      "Plan de prueba de 15 UYU para verificar que todo funciona correctamente.",
     features: [
       "Este es un plan de prueba",
       "Solo para verificar el flujo de pago",
-      "Cuesta 5 pesos uruguayos (mínimo de MercadoPago)",
+      "Cuesta 15 pesos uruguayos (mínimo de MercadoPago para suscripciones)",
     ],
-    price: 0.12, // ~5 UYU al cambio actual (5 UYU / 43.5 = ~0.115 USD)
-    annualPrice: 0.12,
+    price: 0.35, // ~15 UYU al cambio actual (15 UYU / 43.5 = ~0.345 USD)
+    annualPrice: 0.35,
     upgrade: {
       name: "Extra de prueba",
-      price: 0.12,
+      price: 0.35,
     },
   },
   {
