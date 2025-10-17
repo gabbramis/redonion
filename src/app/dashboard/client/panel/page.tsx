@@ -46,7 +46,12 @@ export default function ClientPanel() {
         .eq('status', 'active')
         .single();
 
+      console.log('🔍 User ID:', user.id);
+      console.log('🔍 Plan Data:', planData);
+      console.log('🔍 Error:', error);
+
       if (planData && !error) {
+        console.log('✅ Found active plan:', planData.plan_name);
         setUserPlan({
           name: planData.plan_name,
           tier: planData.plan_tier,
@@ -56,22 +61,9 @@ export default function ClientPanel() {
           startDate: planData.start_date,
         });
       } else {
-        // If no plan found, use mock data for now
-        setUserPlan({
-          name: "Plan Estándar",
-          tier: "estandar",
-          billing: "monthly",
-          price: 249,
-          features: [
-            "Sitio web personalizado",
-            "Gestión de 2 redes sociales",
-            "Publicaciones cada dos días",
-            "SEO general",
-            "Portal con métricas",
-            "Soporte prioritario",
-          ],
-          startDate: "2025-01-15",
-        });
+        console.log('❌ No active plan found');
+        // No active plan found - user needs to subscribe
+        setUserPlan(null);
       }
 
       // Fetch custom message from client panel settings
@@ -233,9 +225,15 @@ export default function ClientPanel() {
 
         {/* Main Content */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          {activeSection === "dashboard" && userPlan && <DashboardSection userPlan={userPlan} customMessage={customMessage} />}
-          {activeSection === "media" && <MediaSection />}
-          {activeSection === "profile" && userPlan && <ProfileSection user={user} userPlan={userPlan} />}
+          {!userPlan ? (
+            <NoPlanSection />
+          ) : (
+            <>
+              {activeSection === "dashboard" && <DashboardSection userPlan={userPlan} customMessage={customMessage} />}
+              {activeSection === "media" && <MediaSection />}
+              {activeSection === "profile" && <ProfileSection user={user} userPlan={userPlan} />}
+            </>
+          )}
         </main>
       </div>
     </div>
@@ -244,20 +242,6 @@ export default function ClientPanel() {
 
 // Dashboard Section Component
 function DashboardSection({ userPlan, customMessage }: { userPlan: UserPlan; customMessage: string }) {
-  const stats = [
-    { label: "Visitas del Sitio", value: "2,847", change: "+12.5%", positive: true },
-    { label: "Engagement Redes", value: "18.4%", change: "+3.2%", positive: true },
-    { label: "Publicaciones este Mes", value: "24", change: "En meta", positive: true },
-    { label: "Conversiones", value: "127", change: "+8.1%", positive: true },
-  ];
-
-  const recentActivity = [
-    { action: "Publicación en Instagram", date: "Hace 2 horas", status: "completed" },
-    { action: "Reporte mensual generado", date: "Hace 1 día", status: "completed" },
-    { action: "Actualización de sitio web", date: "Hace 3 días", status: "completed" },
-    { action: "Campaña publicitaria activa", date: "Hace 5 días", status: "active" },
-  ];
-
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
@@ -267,66 +251,31 @@ function DashboardSection({ userPlan, customMessage }: { userPlan: UserPlan; cus
         transition={{ duration: 0.5 }}
         className="bg-gradient-to-r from-red-600 to-orange-600 rounded-xl p-6 sm:p-8 text-white"
       >
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2">¡Bienvenido de vuelta! 👋</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold mb-2">¡Bienvenido de vuelta!</h2>
         <p className="text-red-100">
-          Tu {userPlan.name} está activo y en funcionamiento. Aquí está tu resumen.
+          Tu {userPlan.name} está activo y en funcionamiento.
         </p>
       </motion.div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        {stats.map((stat, index) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 + index * 0.05 }}
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg"
-          >
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{stat.label}</p>
-            <div className="flex items-baseline justify-between">
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
-              <span
-                className={`text-xs font-medium ${
-                  stat.positive ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"
-                }`}
-              >
-                {stat.change}
-              </span>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Recent Activity */}
+      {/* Plan Active Status */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
         className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg"
       >
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Actividad Reciente</h3>
-        <div className="space-y-4">
-          {recentActivity.map((activity, index) => (
-            <div key={index} className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700 last:border-0">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    activity.status === "active" ? "bg-green-500 animate-pulse" : "bg-gray-400"
-                  }`}
-                />
-                <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">{activity.action}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{activity.date}</p>
-                </div>
-              </div>
-              {activity.status === "active" && (
-                <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
-                  Activo
-                </span>
-              )}
-            </div>
-          ))}
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+            <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Suscripción Activa</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Tu plan {userPlan.name} está funcionando correctamente
+            </p>
+          </div>
         </div>
       </motion.div>
 
@@ -335,7 +284,7 @@ function DashboardSection({ userPlan, customMessage }: { userPlan: UserPlan; cus
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
           className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 sm:p-8 shadow-lg border border-blue-200 dark:border-blue-800"
         >
           <div className="flex items-start gap-4">
@@ -771,6 +720,41 @@ function ProfileSection({ user, userPlan }: { user: { email?: string; user_metad
             </div>
           ))}
         </div>
+      </motion.div>
+    </div>
+  );
+}
+// No Plan Section - shown when user hasn't subscribed yet
+function NoPlanSection() {
+  const router = useRouter();
+
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white dark:bg-gray-800 rounded-xl p-8 sm:p-12 shadow-lg text-center max-w-md"
+      >
+        <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+          No tienes un plan activo
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          Necesitas suscribirte a un plan para acceder a tu panel de cliente y todas las funcionalidades.
+        </p>
+
+        <button
+          onClick={() => router.push("/dashboard/client")}
+          className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
+        >
+          Ver Planes Disponibles
+        </button>
       </motion.div>
     </div>
   );

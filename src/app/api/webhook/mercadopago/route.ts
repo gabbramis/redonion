@@ -69,17 +69,24 @@ export async function POST(request: Request) {
           'premium': 'Plan Premium'
         };
 
+        // Get price from subscription data
+        const priceUYU = subscriptionData.auto_recurring?.transaction_amount || 0;
+
         // Insert or update user_plans table
         const { error } = await supabase.from("user_plans").upsert({
           user_id: userId,
           plan_name: planNames[planTier] || planTier,
           plan_tier: planTier,
+          billing_type: frequency === 12 ? 'annual' : 'monthly',
+          price: priceUYU, // Store in UYU
+          features: [], // Will be populated later if needed
           status: "active",
           subscription_id: preapprovalId,
           subscription_start: new Date().toISOString(),
           subscription_end: endDate.toISOString(),
           billing_frequency: frequency, // Store the frequency (1 or 12)
           billing_period: frequencyType, // Store the period type (months or years)
+          start_date: new Date().toISOString(),
         }, {
           onConflict: "user_id"
         });

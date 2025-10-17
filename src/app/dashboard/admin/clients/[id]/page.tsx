@@ -43,8 +43,11 @@ export default function ManageClientPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
   const [clientEmail, setClientEmail] = useState("");
   const [clientName, setClientName] = useState("");
+  const [editedName, setEditedName] = useState("");
+  const [editedEmail, setEditedEmail] = useState("");
   const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
 
   // Client panel settings
@@ -90,10 +93,16 @@ export default function ManageClientPage() {
         return;
       }
 
-      // For testing: Use the client ID directly (it's already a UUID)
-      // In production, this would be the selected client's ID
-      setClientEmail(user.email || "cliente@test.com");
-      setClientName(user.user_metadata?.full_name || "Cliente de Prueba");
+      // Fetch actual client data using the clientId
+      const { data: clientData } = await supabase.auth.admin.getUserById(clientId);
+
+      const email = clientData?.user?.email || "cliente@test.com";
+      const name = clientData?.user?.user_metadata?.full_name || "Cliente de Prueba";
+
+      setClientEmail(email);
+      setClientName(name);
+      setEditedEmail(email);
+      setEditedName(name);
 
       // Fetch client plan
       const { data: planData } = await supabase
@@ -174,6 +183,31 @@ export default function ManageClientPage() {
       alert(`Error al guardar: ${error.message}`);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    setSavingProfile(true);
+
+    try {
+      // Update user metadata through Supabase Admin API
+      const { error } = await supabase.auth.admin.updateUserById(clientId, {
+        email: editedEmail,
+        user_metadata: {
+          full_name: editedName,
+        },
+      });
+
+      if (error) throw error;
+
+      setClientEmail(editedEmail);
+      setClientName(editedName);
+      alert("Perfil actualizado exitosamente");
+    } catch (err) {
+      const error = err as Error;
+      alert(`Error al actualizar perfil: ${error.message}`);
+    } finally {
+      setSavingProfile(false);
     }
   };
 
@@ -308,6 +342,54 @@ export default function ManageClientPage() {
               Vista Previa
             </Link>
           </div>
+        </motion.div>
+
+        {/* Edit Profile Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-8"
+        >
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            Editar Información del Cliente
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Nombre Completo
+              </label>
+              <input
+                type="text"
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
+                placeholder="Nombre del cliente"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Correo Electrónico
+              </label>
+              <input
+                type="email"
+                value={editedEmail}
+                onChange={(e) => setEditedEmail(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
+                placeholder="correo@ejemplo.com"
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={handleSaveProfile}
+            disabled={savingProfile}
+            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors"
+          >
+            {savingProfile ? "Guardando..." : "Guardar Perfil"}
+          </button>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

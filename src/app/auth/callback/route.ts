@@ -16,7 +16,7 @@ export async function GET(request: Request) {
                       data.user.user_metadata?.role === 'admin'
 
       // Redirect based on role
-      const redirectPath = isAdmin ? '/dashboard/admin' : '/dashboard/client'
+      const redirectPath = isAdmin ? '/dashboard/admin' : '/dashboard/client/panel'
       return NextResponse.redirect(`${origin}${redirectPath}`)
     }
   }
