@@ -12,7 +12,94 @@ export async function POST(request: Request) {
 
     console.log("📥 Webhook received:", JSON.stringify(body, null, 2));
 
-    // Handle subscription events (preapproval)
+    // Handle one-time payment events
+    if (body.type === "payment") {
+      const paymentId = body.data?.id;
+
+      if (!paymentId) {
+        console.log("⚠️ No payment ID in webhook");
+        return NextResponse.json({ received: true });
+      }
+
+      // Get payment details
+      const paymentResponse = await fetch(
+        `https://api.mercadopago.com/v1/payments/${paymentId}`,
+        {
+          headers: {
+            "Authorization": `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+          },
+        }
+      );
+
+      if (!paymentResponse.ok) {
+        console.error("❌ Failed to fetch payment:", await paymentResponse.text());
+        return NextResponse.json({ received: true });
+      }
+
+      const paymentData = await paymentResponse.json();
+      console.log("💳 Payment data:", JSON.stringify(paymentData, null, 2));
+
+      // Only process approved payments
+      if (paymentData.status === "approved") {
+        // Parse external_reference (format: userId-planId-billing)
+        const externalRef = paymentData.external_reference;
+        const parts = externalRef ? externalRef.split("-") : [];
+        const userId = parts[0];
+        const planTier = parts[1];
+        const billing = parts[2]; // 'monthly' or 'annual'
+
+        if (!userId || !planTier) {
+          console.error("❌ Invalid external_reference:", externalRef);
+          return NextResponse.json({ error: "Invalid reference" }, { status: 400 });
+        }
+
+        // Calculate subscription end date
+        const endDate = new Date();
+        if (billing === 'annual') {
+          endDate.setFullYear(endDate.getFullYear() + 1);
+        } else {
+          endDate.setMonth(endDate.getMonth() + 1);
+        }
+
+        // Map plan tier to plan name
+        const planNames: Record<string, string> = {
+          'test': 'Plan Test',
+          'basico': 'Plan Básico',
+          'estandar': 'Plan Estándar',
+          'premium': 'Plan Premium'
+        };
+
+        // Insert or update user_plans table
+        const { error } = await supabase.from("user_plans").upsert({
+          user_id: userId,
+          plan_name: planNames[planTier] || planTier,
+          plan_tier: planTier,
+          billing_type: billing,
+          price: paymentData.transaction_amount,
+          features: [],
+          status: "active",
+          subscription_id: paymentData.id.toString(),
+          subscription_start: new Date().toISOString(),
+          subscription_end: endDate.toISOString(),
+          billing_frequency: billing === 'annual' ? 12 : 1,
+          billing_period: 'months',
+          start_date: new Date().toISOString(),
+        }, {
+          onConflict: "user_id"
+        });
+
+        if (error) {
+          console.error("❌ Error upserting user_plan:", error);
+          return NextResponse.json({ error: "Database error" }, { status: 500 });
+        }
+
+        console.log(`✅ Payment approved for user ${userId}, plan ${planTier} (${billing})`);
+      }
+
+      return NextResponse.json({ received: true });
+    }
+
+    // Handle subscription events (preapproval) - keeping for future use
     if (body.type === "subscription_preapproval" || body.action === "created") {
       const preapprovalId = body.data?.id;
 
