@@ -5,14 +5,9 @@ export async function POST(request: Request) {
   try {
     const { planId, planName, price, billing } = await request.json();
 
-    // Calculate the correct amount based on billing type
-    // For annual billing: price is monthly, so multiply by 12 for the annual total
-    // For monthly billing: price is already correct
-    const totalPrice = billing === "annual" ? price * 12 : price;
-
-    console.log(`💵 Converting $${totalPrice} USD to UYU (${billing} billing)...`);
-    const priceInUYU = await convertUSDtoUYU(totalPrice);
-    console.log(`💵 Converted: $${totalPrice} USD = $${priceInUYU} UYU`);
+    console.log(`💵 Converting $${price} USD to UYU (${billing} billing)...`);
+    const priceInUYU = await convertUSDtoUYU(price);
+    console.log(`💵 Converted: $${price} USD = $${priceInUYU} UYU`);
 
     // Calculate subscription frequency
     const frequency = billing === "annual" ? 12 : 1;

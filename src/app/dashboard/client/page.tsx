@@ -156,10 +156,9 @@ export default function ClientDashboard() {
       setCart((prevCart) => {
         const newCart = prevCart.map((item) => {
           if (item.type === "plan") {
-            // For annual billing, multiply by 12 to show total annual cost
             const planPrice = billing === "monthly"
               ? selectedPlan.price
-              : selectedPlan.annualPrice * 12;
+              : selectedPlan.annualPrice;
 
             return {
               ...item,
@@ -183,10 +182,9 @@ export default function ClientDashboard() {
   const handleSelectPlan = (plan: Plan) => {
     setSelectedPlan(plan);
 
-    // For annual billing, multiply by 12 to show total annual cost
     const planPrice = billing === "monthly"
       ? plan.price
-      : plan.annualPrice * 12;
+      : plan.annualPrice;
 
     setCart([
       {
@@ -229,8 +227,14 @@ export default function ClientDashboard() {
   };
 
   const calculateTotal = () => {
-    const total = cart.reduce((sum, item) => sum + item.price, 0);
-    return Number(total.toFixed(2));
+    const total = cart.reduce((sum, item) => {
+      // For annual plans, multiply by 12 for display purposes only
+      if (item.billing === "annual" && item.type === "plan") {
+        return sum + (item.price * 12);
+      }
+      return sum + item.price;
+    }, 0);
+    return total.toFixed(2);
   };
 
   const toggleExpandPlan = (planId: string) => {
@@ -251,6 +255,11 @@ export default function ClientDashboard() {
 
     setProcessingPayment(true);
     try {
+      // Get the base plan price (monthly rate for annual, or monthly price for monthly)
+      const planPrice = billing === "monthly"
+        ? selectedPlan.price
+        : selectedPlan.annualPrice;
+
       // Create subscription with MercadoPago
       const response = await fetch("/api/create-payment", {
         method: "POST",
@@ -258,7 +267,7 @@ export default function ClientDashboard() {
         body: JSON.stringify({
           planId: selectedPlan.id,
           planName: selectedPlan.name,
-          price: calculateTotal(),
+          price: planPrice,
           userId: user.id,
           userEmail: user.email,
           billing: billing,
@@ -630,7 +639,9 @@ export default function ClientDashboard() {
                           </p>
                         </div>
                         <span className="font-semibold text-gray-900 dark:text-white">
-                          ${item.price.toFixed(2)}
+                          ${item.billing === "annual" && item.type === "plan"
+                            ? (item.price * 12).toFixed(2)
+                            : item.price.toFixed(2)}
                         </span>
                       </div>
                     ))}
