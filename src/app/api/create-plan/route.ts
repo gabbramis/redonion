@@ -5,13 +5,14 @@ export async function POST(request: Request) {
   try {
     const { planId, planName, price, billing } = await request.json();
 
-    console.log(`💵 Converting $${price} USD to UYU (${billing} billing)...`);
-    const priceInUYU = await convertUSDtoUYU(price);
-    console.log(`💵 Converted: $${price} USD = $${priceInUYU} UYU`);
-
-    // Calculate subscription frequency
+    // For annual billing, multiply by 12 to get the yearly total
+    const totalPrice = billing === "annual" ? price * 12 : price;
     const frequency = billing === "annual" ? 12 : 1;
     const frequencyType = "months";
+
+    console.log(`💵 Converting $${totalPrice} USD to UYU (${billing} billing, frequency: ${frequency} ${frequencyType})...`);
+    const priceInUYU = await convertUSDtoUYU(totalPrice);
+    console.log(`💵 Converted: $${totalPrice} USD = $${priceInUYU} UYU`);
 
     // Create plan using direct API call with UYU pricing
     const planData = {
