@@ -41,8 +41,14 @@ export async function POST(request: Request) {
 
     if (!planResponse.ok) {
       console.error("❌ MercadoPago plan error:", planResponseData);
+      console.error("❌ Full request data was:", planData);
       return NextResponse.json(
-        { error: "Error creating plan", details: planResponseData },
+        {
+          error: "Error creating plan",
+          details: planResponseData,
+          requestData: planData,
+          mpStatus: planResponse.status
+        },
         { status: planResponse.status }
       );
     }
