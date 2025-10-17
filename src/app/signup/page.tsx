@@ -50,6 +50,32 @@ export default function SignupPage() {
 
       if (signUpError) throw signUpError;
 
+      // Create a pending user_plans entry for the new user
+      if (data?.user) {
+        const { error: planError } = await supabase
+          .from('user_plans')
+          .insert({
+            user_id: data.user.id,
+            plan_name: 'Sin Plan',
+            plan_tier: 'none',
+            billing_type: 'monthly',
+            price: 0,
+            features: [],
+            status: 'pending',
+            subscription_id: null,
+            subscription_start: null,
+            subscription_end: null,
+            billing_frequency: 1,
+            billing_period: 'months',
+            start_date: new Date().toISOString(),
+          });
+
+        if (planError) {
+          console.error('Error creating user_plans entry:', planError);
+          // Don't fail the signup if this fails, just log it
+        }
+      }
+
       // Check if email confirmation is required
       if (data?.user && !data.session) {
         // Email confirmation required
