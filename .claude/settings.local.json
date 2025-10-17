@@ -26,7 +26,8 @@
       "WebFetch(domain:www.mercadopago.com.mx)",
       "WebFetch(domain:docs.lemonsqueezy.com)",
       "Bash(dir:*)",
-      "WebFetch(domain:www.mercadopago.com.br)"
+      "WebFetch(domain:www.mercadopago.com.br)",
+      "Bash(pnpm install:*)"
     ],
     "deny": [],
     "ask": []
