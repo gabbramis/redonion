@@ -5,10 +5,14 @@ export async function POST(request: Request) {
   try {
     const { planId, planName, price, userId, userEmail, billing } = await request.json();
 
-    // Step 1: Convert USD price to UYU using real-time exchange rate
-    console.log(`💵 Converting $${price} USD to UYU...`);
-    const priceInUYU = await convertUSDtoUYU(price);
-    console.log(`💵 Converted: $${price} USD = $${priceInUYU} UYU`);
+    // Step 1: Calculate the correct amount based on billing type
+    // For annual billing: price is monthly, so multiply by 12 for the annual total
+    // For monthly billing: price is already correct
+    const totalPrice = billing === "annual" ? price * 12 : price;
+
+    console.log(`💵 Converting $${totalPrice} USD to UYU (${billing} billing)...`);
+    const priceInUYU = await convertUSDtoUYU(totalPrice);
+    console.log(`💵 Converted: $${totalPrice} USD = $${priceInUYU} UYU`);
 
     // Step 2: Create a plan with UYU pricing
     const frequency = billing === "annual" ? 12 : 1;
