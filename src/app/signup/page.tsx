@@ -282,13 +282,10 @@ export default function SignupPage() {
               />
               <label htmlFor="terms" className="ml-2 text-sm text-gray-600 dark:text-gray-400">
                 Acepto los{" "}
-                <a href="#" className="text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-400">
+                <a href="/terminos-y-condiciones" className="text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-400">
                   términos y condiciones
                 </a>{" "}
-                y la{" "}
-                <a href="#" className="text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-400">
-                  política de privacidad
-                </a>
+                
               </label>
             </div>
 
