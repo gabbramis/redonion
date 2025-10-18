@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import AdminSidebar from "@/components/AdminSidebar";
+import { ADMIN_EMAILS } from "@/defs/admins";
 
 export default function AdminLayout({
   children,
@@ -25,7 +26,7 @@ export default function AdminLayout({
       }
 
       // Check if admin
-      if (user.email !== "gabrielaramis01@gmail.com" && user.user_metadata?.role !== "admin") {
+      if (!ADMIN_EMAILS.includes(user.email!)) {
         router.push("/dashboard/client");
         return;
       }

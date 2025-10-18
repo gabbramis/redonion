@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { ADMIN_EMAILS } from "@/defs/admins";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -48,8 +49,7 @@ function LoginForm() {
       if (userData?.user) {
         // Get user role from metadata or profile
         const userRole =
-          userData.user.user_metadata?.role ||
-          userData.user.email === "gabrielaramis01@gmail.com"
+          ADMIN_EMAILS.includes(userData.user.email!)
             ? "admin"
             : "client";
 

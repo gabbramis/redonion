@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import Link from "next/link";
+import { ADMIN_EMAILS } from "@/defs/admins";
 
 interface ClientSettings {
   userId: string;
@@ -86,7 +87,7 @@ export default function ManageClientPage() {
       } = await supabase.auth.getUser();
       if (
         !user ||
-        (user.email !== "gabrielaramis01@gmail.com" &&
+        (!ADMIN_EMAILS.includes(user.email!) &&
           user.user_metadata?.role !== "admin")
       ) {
         router.push("/dashboard/admin");

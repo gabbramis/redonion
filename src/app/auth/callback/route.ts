@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { ADMIN_EMAILS } from '../../../defs/admins'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
@@ -28,6 +29,12 @@ export async function GET(request: Request) {
     }
 
     if (data.user) {
+      // Check if user is admin
+      const isAdmin = ADMIN_EMAILS.includes(data.user.email!)
+      if(isAdmin) {
+        return NextResponse.redirect(`${origin}/dashboard/admin`)
+      }
+
       // Create a pending user_plans entry for new users
       // Check if user_plans entry already exists
       const { data: existingPlan } = await supabase
@@ -62,13 +69,8 @@ export async function GET(request: Request) {
         }
       }
 
-      // Check if user is admin
-      const isAdmin = data.user.email === 'gabrielaramis01@gmail.com' ||
-                      data.user.user_metadata?.role === 'admin'
-
       // Redirect based on role
-      const redirectPath = isAdmin ? '/dashboard/admin' : '/dashboard/client/panel'
-      return NextResponse.redirect(`${origin}${redirectPath}`)
+      return NextResponse.redirect(`${origin}/dashboard/client/panel`)
     }
   }
 

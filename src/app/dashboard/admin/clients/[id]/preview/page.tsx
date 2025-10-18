@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import Link from "next/link";
+import { ADMIN_EMAILS } from "@/defs/admins";
 
 type Section = "dashboard" | "media" | "profile";
 
@@ -70,7 +71,7 @@ export default function ClientPreviewPanel() {
     const loadClientData = async () => {
       // Verify admin is logged in
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user || (user.email !== "gabrielaramis01@gmail.com" && user.user_metadata?.role !== "admin")) {
+      if (!user || (!ADMIN_EMAILS.includes(user.email!))) {
         router.push("/dashboard/admin");
         return;
       }
