@@ -3,14 +3,31 @@ import { convertUSDtoUYU } from "@/lib/currency";
 
 export async function POST(request: Request) {
   try {
-    const { planId, planName, price, userId, userEmail, billing } = await request.json();
+    const { planId, planName, price, userId, userEmail, billing, cart } = await request.json();
 
-    // For annual billing, multiply by 12 to get the yearly total
-    const totalPrice = billing === "annual" ? price * 12 : price;
+    // Calculate total price including extras from cart
+    let totalPrice = 0;
+    if (cart && Array.isArray(cart)) {
+      // Sum up all items in cart
+      totalPrice = cart.reduce((sum: number, item: any) => {
+        // For annual plans, don't multiply here as it's already the monthly rate
+        return sum + item.price;
+      }, 0);
+
+      // For annual billing, multiply by 12 to get the yearly total
+      if (billing === "annual") {
+        totalPrice = totalPrice * 12;
+      }
+    } else {
+      // Fallback to old behavior if cart is not provided
+      totalPrice = billing === "annual" ? price * 12 : price;
+    }
+
     const frequency = billing === "annual" ? 12 : 1;
     const frequencyType = "months";
 
     console.log(`💵 Converting $${totalPrice} USD to UYU (${billing} billing, frequency: ${frequency} ${frequencyType})...`);
+    console.log(`🛒 Cart items:`, cart);
     const priceInUYU = await convertUSDtoUYU(totalPrice);
     console.log(`💵 Converted: $${totalPrice} USD = $${priceInUYU} UYU`);
 

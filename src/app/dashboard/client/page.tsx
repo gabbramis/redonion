@@ -271,6 +271,7 @@ export default function ClientDashboard() {
           userId: user.id,
           userEmail: user.email,
           billing: billing,
+          cart: cart, // Include the full cart with extras
         }),
       });
 
