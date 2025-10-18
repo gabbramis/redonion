@@ -19,7 +19,7 @@ interface UserPlan {
 export default function ClientPanel() {
   const [user, setUser] = useState<{ email?: string; user_metadata?: { full_name?: string } } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeSection, setActiveSection] = useState<Section>("dashboard");
+  const [activeSection] = useState<Section>("dashboard");
   const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [customMessage, setCustomMessage] = useState<string>("");
   const router = useRouter();

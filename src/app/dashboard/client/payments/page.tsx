@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import Image from "next/image";
 
 interface Payment {
   id: string;
@@ -23,7 +22,6 @@ export default function PaymentsPage() {
   const [loading, setLoading] = useState(true);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [error, setError] = useState<string>("");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -61,11 +59,6 @@ export default function PaymentsPage() {
 
     fetchPaymentHistory();
   }, [router, supabase]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { bg: string; text: string; label: string }> = {

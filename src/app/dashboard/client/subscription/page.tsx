@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import Image from "next/image";
 
 interface Subscription {
   id: string;
@@ -108,7 +107,6 @@ export default function SubscriptionPage() {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [error, setError] = useState<string>("");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -146,11 +144,6 @@ export default function SubscriptionPage() {
 
     fetchSubscriptionDetails();
   }, [router, supabase]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
 
   const handleUpgrade = (planId: string) => {
     router.push(`/dashboard/client?plan=${planId}`);
