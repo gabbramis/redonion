@@ -34,6 +34,19 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 2. Enable **Email** provider (it should be enabled by default)
 3. Configure email templates if needed
 
+### Configure Redirect URLs
+
+1. Go to **Authentication** → **URL Configuration**
+2. Add the following URLs to **Redirect URLs**:
+   - Development: `http://localhost:3000/auth/callback`
+   - Production: `https://yourdomain.com/auth/callback`
+3. Click **Save**
+
+> **Important**: The auth callback URL is required for:
+> - Email confirmation links (when users sign up with email/password)
+> - OAuth authentication (Google, etc.)
+> - Password reset links
+
 ## Step 5: Create Admin User
 
 You need to create your admin user in Supabase:
@@ -88,12 +101,30 @@ WHERE email = 'gabrielaramis01@gmail.com';
 
 ### Authentication Flow
 
+#### Email/Password Login
 1. **Login**: User enters credentials on `/login` page
 2. **Verification**: Supabase verifies credentials
 3. **Role Check**: System checks if user is admin (email match or metadata)
 4. **Redirect**:
    - Admin users → `/dashboard/admin`
-   - Client users → `/dashboard/client`
+   - Client users → `/dashboard/client/panel`
+
+#### Email/Password Signup with Confirmation
+1. **Signup**: User registers on `/signup` page
+2. **Email Sent**: Supabase sends confirmation email with a link
+3. **Click Link**: User clicks the confirmation link in their email
+4. **Callback**: Link redirects to `/auth/callback` with auth code
+5. **Session Creation**: Callback exchanges code for session
+6. **User Plan**: Creates default "Sin Plan" entry in user_plans table
+7. **Redirect**: Routes user to appropriate dashboard based on role
+
+#### OAuth Login (Google)
+1. **OAuth Start**: User clicks "Continue with Google" button
+2. **Google Auth**: User authenticates with Google
+3. **Callback**: Google redirects to `/auth/callback` with auth code
+4. **Session Creation**: Callback exchanges code for session
+5. **User Plan**: Creates default "Sin Plan" entry if new user
+6. **Redirect**: Routes user to appropriate dashboard based on role
 
 ### Admin Dashboard Features
 

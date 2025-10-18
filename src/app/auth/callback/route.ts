@@ -4,14 +4,31 @@ import { NextResponse } from 'next/server'
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
+  const error_description = requestUrl.searchParams.get('error_description')
+  const error = requestUrl.searchParams.get('error')
   const origin = requestUrl.origin
+
+  // Handle errors from Supabase auth
+  if (error) {
+    console.error('Auth callback error:', error, error_description)
+    return NextResponse.redirect(
+      `${origin}/login?error=${encodeURIComponent(error_description || 'Authentication failed')}`
+    )
+  }
 
   if (code) {
     const supabase = await createClient()
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
 
-    if (!error && data.user) {
-      // Create a pending user_plans entry for new users (OAuth)
+    if (exchangeError) {
+      console.error('Error exchanging code for session:', exchangeError)
+      return NextResponse.redirect(
+        `${origin}/login?error=${encodeURIComponent('Unable to verify authentication')}`
+      )
+    }
+
+    if (data.user) {
+      // Create a pending user_plans entry for new users
       // Check if user_plans entry already exists
       const { data: existingPlan } = await supabase
         .from('user_plans')
@@ -21,7 +38,7 @@ export async function GET(request: Request) {
 
       // If no plan exists, create one
       if (!existingPlan) {
-        await supabase
+        const { error: planError } = await supabase
           .from('user_plans')
           .insert({
             user_id: data.user.id,
@@ -38,6 +55,11 @@ export async function GET(request: Request) {
             billing_period: 'months',
             start_date: new Date().toISOString(),
           })
+
+        if (planError) {
+          console.error('Error creating user_plans entry:', planError)
+          // Continue anyway - don't block login for this
+        }
       }
 
       // Check if user is admin
@@ -50,6 +72,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // If there's an error, redirect to login
+  // If there's no code or user, redirect to login
   return NextResponse.redirect(`${origin}/login`)
 }
