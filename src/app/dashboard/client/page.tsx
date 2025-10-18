@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import { VisaIcon } from "@/components/ui/icons/brandico-visa";
@@ -120,34 +120,13 @@ const plans: Plan[] = [
 ];
 
 export default function ClientDashboard() {
-  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
-  const [loading, setLoading] = useState(true);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [selectedExtras, setSelectedExtras] = useState<Set<string>>(new Set());
   const [cart, setCart] = useState<CartItem[]>([]);
   const [expandedPlans, setExpandedPlans] = useState<Set<string>>(new Set());
-  const router = useRouter();
   const supabase = createClient();
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.push("/login");
-        return;
-      }
-
-      setUser(user);
-      setLoading(false);
-    };
-
-    checkUser();
-  }, [router, supabase]);
 
   // Update cart when billing changes
   useEffect(() => {
@@ -172,11 +151,6 @@ export default function ClientDashboard() {
       });
     }
   }, [billing, selectedPlan]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
 
   const handleSelectPlan = (plan: Plan) => {
     setSelectedPlan(plan);
@@ -243,13 +217,24 @@ export default function ClientDashboard() {
   };
 
   const handleProceedToPayment = async () => {
-    if (!user || !selectedPlan || cart.length === 0) {
+    if (!selectedPlan || cart.length === 0) {
       alert("Por favor selecciona un plan");
       return;
     }
 
     setProcessingPayment(true);
     try {
+      // Get current user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        alert("Error: Usuario no autenticado");
+        setProcessingPayment(false);
+        return;
+      }
+
       // Get the base plan price (monthly rate for annual, or monthly price for monthly)
       const planPrice = billing === "monthly"
         ? selectedPlan.price
@@ -286,60 +271,8 @@ export default function ClientDashboard() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Image
-                src="/onion-logo.png"
-                alt="RedOnion Logo"
-                width={40}
-                height={40}
-                className="object-contain"
-              />
-              <div>
-                <h1 className="text-2xl font-bold">
-                  <span className="text-red-500">Red</span>
-                  <span className="text-gray-900 dark:text-white">Onion</span>
-                </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Selecciona tu Plan
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {user?.email}
-                </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  Cliente
-                </p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors"
-              >
-                Cerrar Sesión
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -748,7 +681,6 @@ export default function ClientDashboard() {
             </motion.div>
           </div>
         </div>
-      </main>
     </div>
   );
 }

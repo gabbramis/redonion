@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import Image from "next/image";
 
 type Section = "dashboard" | "media" | "profile";
 
@@ -21,7 +20,6 @@ export default function ClientPanel() {
   const [user, setUser] = useState<{ email?: string; user_metadata?: { full_name?: string } } | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<Section>("dashboard");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [customMessage, setCustomMessage] = useState<string>("");
   const router = useRouter();
@@ -83,11 +81,6 @@ export default function ClientPanel() {
     checkUserAndFetchPlan();
   }, [router, supabase]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -97,146 +90,17 @@ export default function ClientPanel() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {/* Mobile menu button */}
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              >
-                <svg className="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-
-              <div className="flex items-center gap-3">
-                <Image
-                  src="/onion-logo.png"
-                  alt="RedOnion Logo"
-                  width={40}
-                  height={40}
-                  className="object-contain"
-                />
-                <div>
-                  <h1 className="text-2xl font-bold">
-                    <span className="text-red-500">Red</span>
-                    <span className="text-gray-900 dark:text-white">Onion</span>
-                  </h1>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Panel de Cliente</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
-                {user?.user_metadata?.full_name || user?.email}
-              </p>
-              <p className="text-xs text-gray-600 dark:text-gray-400">{userPlan?.name}</p>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="flex">
-        {/* Sidebar */}
-        <aside
-          className={`${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-300 ease-in-out mt-[73px] lg:mt-0 flex flex-col`}
-        >
-          <nav className="p-4 space-y-2 mt-4 flex-1">
-            <button
-              onClick={() => {
-                setActiveSection("dashboard");
-                setSidebarOpen(false);
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                activeSection === "dashboard"
-                  ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-500"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              <span className="font-medium">Dashboard</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setActiveSection("media");
-                setSidebarOpen(false);
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                activeSection === "media"
-                  ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-500"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span className="font-medium">Subir Contenido</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setActiveSection("profile");
-                setSidebarOpen(false);
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                activeSection === "profile"
-                  ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-500"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              <span className="font-medium">Mi Perfil</span>
-            </button>
-          </nav>
-
-          {/* Logout button at bottom */}
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-500"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              <span className="font-medium">Cerrar Sesión</span>
-            </button>
-          </div>
-        </aside>
-
-        {/* Mobile sidebar overlay */}
-        {sidebarOpen && (
-          <div
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden fixed inset-0 bg-black/50 z-30 mt-[73px]"
-          />
+    <>
+        {!userPlan ? (
+          <NoPlanSection />
+        ) : (
+          <>
+            {activeSection === "dashboard" && <DashboardSection userPlan={userPlan} customMessage={customMessage} />}
+            {activeSection === "media" && <MediaSection />}
+            {activeSection === "profile" && <ProfileSection user={user} userPlan={userPlan} />}
+          </>
         )}
-
-        {/* Main Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          {!userPlan ? (
-            <NoPlanSection />
-          ) : (
-            <>
-              {activeSection === "dashboard" && <DashboardSection userPlan={userPlan} customMessage={customMessage} />}
-              {activeSection === "media" && <MediaSection />}
-              {activeSection === "profile" && <ProfileSection user={user} userPlan={userPlan} />}
-            </>
-          )}
-        </main>
-      </div>
-    </div>
+    </>
   );
 }
 
