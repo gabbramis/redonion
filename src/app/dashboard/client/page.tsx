@@ -128,7 +128,6 @@ export default function ClientDashboard() {
   const [selectedExtras, setSelectedExtras] = useState<Set<string>>(new Set());
   const [cart, setCart] = useState<CartItem[]>([]);
   const [expandedPlans, setExpandedPlans] = useState<Set<string>>(new Set());
-  const [subscriptionUrl, setSubscriptionUrl] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -196,8 +195,6 @@ export default function ClientDashboard() {
       },
     ]);
     setSelectedExtras(new Set());
-    // Reset subscription URL when changing plans
-    setSubscriptionUrl(null);
   };
 
   const toggleExtra = (planId: string, extraName: string, price: number) => {
@@ -222,8 +219,6 @@ export default function ClientDashboard() {
     }
 
     setSelectedExtras(newExtras);
-    // Reset subscription URL when extras change
-    setSubscriptionUrl(null);
   };
 
   const calculateTotal = () => {
@@ -372,7 +367,6 @@ export default function ClientDashboard() {
             <button
               onClick={() => {
                 setBilling("monthly");
-                setSubscriptionUrl(null); // Reset subscription when billing changes
               }}
               className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
                 billing === "monthly"
@@ -385,7 +379,6 @@ export default function ClientDashboard() {
             <button
               onClick={() => {
                 setBilling("annual");
-                setSubscriptionUrl(null); // Reset subscription when billing changes
               }}
               className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
                 billing === "annual"

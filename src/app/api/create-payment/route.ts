@@ -1,15 +1,23 @@
 import { NextResponse } from "next/server";
 import { convertUSDtoUYU } from "@/lib/currency";
 
+interface CartItem {
+  type: "plan" | "extra";
+  id: string;
+  name: string;
+  price: number;
+  billing: "monthly" | "annual";
+}
+
 export async function POST(request: Request) {
   try {
-    const { planId, planName, price, userId, userEmail, billing, cart } = await request.json();
+    const { planName, price, billing, cart } = await request.json();
 
     // Calculate total price including extras from cart
     let totalPrice = 0;
     if (cart && Array.isArray(cart)) {
       // Sum up all items in cart
-      totalPrice = cart.reduce((sum: number, item: any) => {
+      totalPrice = cart.reduce((sum: number, item: CartItem) => {
         // For annual plans, don't multiply here as it's already the monthly rate
         return sum + item.price;
       }, 0);

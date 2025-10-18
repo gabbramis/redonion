@@ -3,7 +3,7 @@ import { convertUSDtoUYU } from "@/lib/currency";
 
 export async function POST(request: Request) {
   try {
-    const { planId, planName, price, billing } = await request.json();
+    const { planName, price, billing } = await request.json();
 
     // For annual billing, multiply by 12 to get the yearly total
     const totalPrice = billing === "annual" ? price * 12 : price;

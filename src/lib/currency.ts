@@ -66,7 +66,7 @@ export async function getExchangeRate(
   try {
     // Try to get real-time rate from free API
     return await getExchangeRateFromAPI(from, to);
-  } catch (error) {
+  } catch {
     console.error("Failed to fetch real-time exchange rate, using fallback rate");
 
     // Fallback to approximate rate (update this periodically)
