@@ -26,8 +26,10 @@ export default function AdminLayout({
       }
 
       // Check if admin
-      if (!ADMIN_EMAILS.includes(user.email!)) {
-        router.push("/dashboard/client");
+      const userEmail = user.email?.toLowerCase() || ''
+      const isAdmin = ADMIN_EMAILS.some(email => email.toLowerCase() === userEmail)
+      if (!isAdmin) {
+        router.push("/dashboard/client/panel");
         return;
       }
 

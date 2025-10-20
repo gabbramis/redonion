@@ -30,7 +30,8 @@ export async function GET(request: Request) {
 
     if (data.user) {
       // Check if user is admin
-      const isAdmin = ADMIN_EMAILS.includes(data.user.email!)
+      const userEmail = data.user.email?.toLowerCase() || ''
+      const isAdmin = ADMIN_EMAILS.some(email => email.toLowerCase() === userEmail)
       if(isAdmin) {
         return NextResponse.redirect(`${origin}/dashboard/admin`)
       }
