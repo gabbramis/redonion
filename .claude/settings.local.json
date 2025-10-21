@@ -27,7 +27,8 @@
       "WebFetch(domain:docs.lemonsqueezy.com)",
       "Bash(dir:*)",
       "WebFetch(domain:www.mercadopago.com.br)",
-      "Bash(pnpm install:*)"
+      "Bash(pnpm install:*)",
+      "Bash(del \"C:\\Users\\ADMIN\\Desktop\\projects\\redonion\\src\\app\\auth\\callback\\route.ts\")"
     ],
     "deny": [],
     "ask": []

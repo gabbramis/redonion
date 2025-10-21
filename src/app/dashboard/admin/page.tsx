@@ -26,46 +26,70 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log('🔄 Fetching clients from Supabase...');
+      console.log('🔄 Fetching clients from API...');
 
-      // Fetch clients from user_plans table
-      const { data: plansData, error } = await supabase
-        .from('user_plans')
-        .select('user_id, plan_name, plan_tier, status, created_at')
-        .order('created_at', { ascending: false });
+      try {
+        // Get auth session to pass token
+        const { data: { session } } = await supabase.auth.getSession();
 
-      console.log('📊 Query result:', { plansData, error });
+        if (!session) {
+          console.error('❌ No session found');
+          setClients([]);
+          setStats({ totalClients: 0, activeClients: 0, totalPlans: 0 });
+          setLoading(false);
+          return;
+        }
 
-      if (error) {
-        console.error('❌ Error fetching plans:', error);
-        setClients([]);
-        setStats({ totalClients: 0, activeClients: 0, totalPlans: 0 });
-      } else if (plansData && plansData.length > 0) {
-        console.log('✅ Found', plansData.length, 'plans');
-
-        const clientsList = plansData.map(plan => ({
-          id: plan.user_id,
-          name: `Cliente - ${plan.plan_name}`,
-          email: "Gestionar para ver detalles",
-          status: plan.status,
-          projects: 0,
-          lastLogin: new Date(plan.created_at).toLocaleDateString('es-ES'),
-        }));
-        setClients(clientsList);
-
-        // Calculate stats
-        const uniqueClients = new Set(plansData.map(p => p.user_id)).size;
-        const activeClients = plansData.filter(p => p.status === 'active').length;
-
-        setStats({
-          totalClients: uniqueClients,
-          activeClients: activeClients,
-          totalPlans: plansData.length,
+        // Fetch from admin API with auth token
+        const response = await fetch('/api/admin/users', {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
         });
 
-        console.log('📈 Stats:', { uniqueClients, activeClients, totalPlans: plansData.length });
-      } else {
-        console.log('⚠️ No plans found in database');
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('❌ API error:', errorData);
+          setClients([]);
+          setStats({ totalClients: 0, activeClients: 0, totalPlans: 0 });
+          setLoading(false);
+          return;
+        }
+
+        const { users } = await response.json();
+        console.log('📊 API result:', users);
+
+        if (users && users.length > 0) {
+          console.log('✅ Found', users.length, 'users');
+
+          const clientsList = users.map((user: any) => ({
+            id: user.id,
+            name: `Cliente - ${user.plan_name}`,
+            email: user.email,
+            status: user.status,
+            projects: 0,
+            lastLogin: new Date(user.created_at).toLocaleDateString('es-ES'),
+          }));
+          setClients(clientsList);
+
+          // Calculate stats
+          const uniqueClients = new Set(users.map((u: any) => u.id)).size;
+          const activeClients = users.filter((u: any) => u.status === 'active').length;
+
+          setStats({
+            totalClients: uniqueClients,
+            activeClients: activeClients,
+            totalPlans: users.length,
+          });
+
+          console.log('📈 Stats:', { uniqueClients, activeClients, totalPlans: users.length });
+        } else {
+          console.log('⚠️ No users found in database');
+          setClients([]);
+          setStats({ totalClients: 0, activeClients: 0, totalPlans: 0 });
+        }
+      } catch (error) {
+        console.error('❌ Error fetching data:', error);
         setClients([]);
         setStats({ totalClients: 0, activeClients: 0, totalPlans: 0 });
       }

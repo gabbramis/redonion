@@ -51,32 +51,6 @@ export default function SignupPage() {
 
       if (signUpError) throw signUpError;
 
-      // Create a pending user_plans entry for the new user
-      if (data?.user) {
-        const { error: planError } = await supabase
-          .from('user_plans')
-          .insert({
-            user_id: data.user.id,
-            plan_name: 'Sin Plan',
-            plan_tier: 'none',
-            billing_type: 'monthly',
-            price: 0,
-            features: [],
-            status: 'pending',
-            subscription_id: null,
-            subscription_start: null,
-            subscription_end: null,
-            billing_frequency: 1,
-            billing_period: 'months',
-            start_date: new Date().toISOString(),
-          });
-
-        if (planError) {
-          console.error('Error creating user_plans entry:', planError);
-          // Don't fail the signup if this fails, just log it
-        }
-      }
-
       // Check if email confirmation is required
       if (data?.user && !data.session) {
         // Email confirmation required
@@ -84,8 +58,32 @@ export default function SignupPage() {
         alert("¡Cuenta creada! Por favor, revisa tu correo para confirmar tu cuenta.");
         router.push("/login");
       } else if (data?.session) {
-        // Auto-logged in, redirect to client dashboard
-        router.push("/dashboard/client");
+        // Auto-logged in, create user plan and redirect
+        console.log('✅ User auto-logged in, user ID:', data?.user?.id);
+        console.log('📞 Calling API to create user plan...');
+
+        // Create user_plans entry
+        const planResponse = await fetch('/api/create-user-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: data?.user?.id,
+            email: data?.user?.email,
+          }),
+        });
+
+        console.log('📊 API Response status:', planResponse.status);
+
+        if (planResponse.ok) {
+          const planData = await planResponse.json();
+          console.log('✅ User plan created successfully:', planData);
+        } else {
+          const errorData = await planResponse.json();
+          console.error('❌ Failed to create user plan:', errorData);
+        }
+
+        // Redirect to dashboard (even if plan creation failed)
+        router.push("/dashboard/client/panel");
       }
     } catch (err) {
       const error = err as Error;

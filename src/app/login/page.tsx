@@ -31,30 +31,21 @@ function LoginForm() {
     setError("");
 
     try {
-      const { error: signInError } =
-        await supabase.auth.signUp({
+      const { data, error: signInError } =
+        await supabase.auth.signInWithPassword({
           email,
           password,
-
-           options: { 
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-           }
         });
 
       if (signInError) throw signInError;
 
-      // Check user metadata to determine if admin or client
-      const { data: userData } = await supabase.auth.getUser();
-
-      if (userData?.user) {
-        // Get user role from metadata or profile
-        const userRole =
-          ADMIN_EMAILS.includes(userData.user.email!)
-            ? "admin"
-            : "client";
+      // Check if user is admin
+      if (data?.user) {
+        const userEmail = data.user.email?.toLowerCase() || '';
+        const isAdmin = ADMIN_EMAILS.some(email => email.toLowerCase() === userEmail);
 
         // Redirect based on role
-        if (userRole === "admin") {
+        if (isAdmin) {
           router.push("/dashboard/admin");
         } else {
           router.push("/dashboard/client/panel");
