@@ -14,6 +14,14 @@ interface Client {
   lastLogin: string;
 }
 
+interface ApiUser {
+  id: string;
+  email: string;
+  plan_name: string;
+  status: string;
+  created_at: string;
+}
+
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState<Client[]>([]);
@@ -62,7 +70,7 @@ export default function AdminDashboard() {
         if (users && users.length > 0) {
           console.log('✅ Found', users.length, 'users');
 
-          const clientsList = users.map((user: any) => ({
+          const clientsList = users.map((user: ApiUser) => ({
             id: user.id,
             name: `Cliente - ${user.plan_name}`,
             email: user.email,
@@ -73,8 +81,8 @@ export default function AdminDashboard() {
           setClients(clientsList);
 
           // Calculate stats
-          const uniqueClients = new Set(users.map((u: any) => u.id)).size;
-          const activeClients = users.filter((u: any) => u.status === 'active').length;
+          const uniqueClients = new Set(users.map((u: ApiUser) => u.id)).size;
+          const activeClients = users.filter((u: ApiUser) => u.status === 'active').length;
 
           setStats({
             totalClients: uniqueClients,
