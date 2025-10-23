@@ -6,6 +6,19 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+interface MercadoPagoPayment {
+  id: string;
+  status: string;
+  status_detail: string;
+  transaction_amount: number;
+  currency_id: string;
+  date_created: string;
+  date_approved: string | null;
+  description: string;
+  payment_method_id: string;
+  payment_type_id: string;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -40,7 +53,7 @@ export async function GET(request: Request) {
 
     console.log(`📋 User plan found. Subscription ID: ${userPlan.subscription_id || 'none'}`);
 
-    let allPayments: any[] = [];
+    let allPayments: MercadoPagoPayment[] = [];
 
     // Try to fetch payments using multiple methods:
 
@@ -85,8 +98,8 @@ export async function GET(request: Request) {
         const externalRefData = await externalRefResponse.json();
         if (externalRefData.results) {
           // Filter out duplicates based on payment ID
-          const existingIds = new Set(allPayments.map((p: any) => p.id));
-          const newPayments = externalRefData.results.filter((p: any) => !existingIds.has(p.id));
+          const existingIds = new Set(allPayments.map((p) => p.id));
+          const newPayments = (externalRefData.results as MercadoPagoPayment[]).filter((p) => !existingIds.has(p.id));
           allPayments = [...allPayments, ...newPayments];
         }
       }
@@ -95,7 +108,7 @@ export async function GET(request: Request) {
     }
 
     // Sort by date created (most recent first)
-    allPayments.sort((a: any, b: any) =>
+    allPayments.sort((a, b) =>
       new Date(b.date_created).getTime() - new Date(a.date_created).getTime()
     );
 
@@ -103,21 +116,8 @@ export async function GET(request: Request) {
 
     const searchData = { results: allPayments };
 
-    interface MercadoPagoPayment {
-      id: string;
-      status: string;
-      status_detail: string;
-      transaction_amount: number;
-      currency_id: string;
-      date_created: string;
-      date_approved: string | null;
-      description: string;
-      payment_method_id: string;
-      payment_type_id: string;
-    }
-
     // Transform MercadoPago payment data to our format
-    const payments = searchData.results?.map((payment: MercadoPagoPayment) => ({
+    const payments = searchData.results?.map((payment) => ({
       id: payment.id,
       status: payment.status,
       statusDetail: payment.status_detail,
