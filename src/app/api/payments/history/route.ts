@@ -132,7 +132,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       payments,
-      total: searchData.paging?.total || 0,
+      total: payments.length,
     });
   } catch (error) {
     console.error("Error fetching payment history:", error);
