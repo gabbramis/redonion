@@ -10,6 +10,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 export default function ClientPanel() {
   const [loading, setLoading] = useState(true);
   const [dashboard, setDashboard] = useState<ClientDashboard | null>(null);
+  const [hasActivePlan, setHasActivePlan] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -23,6 +24,15 @@ export default function ClientPanel() {
           return;
         }
 
+        // Check if user has an active plan
+        const planResponse = await fetch(`/api/subscription/details?userId=${user.id}`);
+        const planData = await planResponse.json();
+
+        if (planData.subscription && planData.subscription.status === 'active') {
+          setHasActivePlan(true);
+        }
+
+        // Fetch dashboard data
         const response = await fetch(`/api/dashboards?client_id=${user.id}`);
         const data = await response.json();
 
@@ -47,6 +57,34 @@ export default function ClientPanel() {
     );
   }
 
+  // Show "No active plan" message if user doesn't have a plan
+  if (!hasActivePlan) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center">
+            <svg className="w-16 h-16 text-yellow-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              No tienes un plan activo
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">
+              Para acceder a tus reportes y métricas, necesitas activar un plan primero.
+            </p>
+            <button
+              onClick={() => router.push("/dashboard/client")}
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
+            >
+              Ver Planes Disponibles
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show "No reports" message if user has a plan but no dashboard data yet
   if (!dashboard) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">

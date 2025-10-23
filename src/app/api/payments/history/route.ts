@@ -11,6 +11,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
 
+    console.log(`💳 Fetching payment history for user: ${userId}`);
+
     if (!userId) {
       return NextResponse.json(
         { error: "User ID is required" },
@@ -18,40 +20,88 @@ export async function GET(request: Request) {
       );
     }
 
-    // Get user's subscription ID from Supabase
-    const { data: userPlan } = await supabase
+    // Get user's plan from Supabase
+    const { data: userPlan, error: planError } = await supabase
       .from("user_plans")
       .select("subscription_id, user_id")
       .eq("user_id", userId)
       .single();
 
-    if (!userPlan?.subscription_id) {
+    if (planError) {
+      console.log(`⚠️ No plan found for user ${userId}:`, planError.message);
+    }
+
+    if (!userPlan) {
       return NextResponse.json({
         payments: [],
-        message: "No subscription found"
+        message: "No plan found for this user"
       });
     }
 
-    // Fetch payments from MercadoPago for this subscription
-    const searchResponse = await fetch(
-      `https://api.mercadopago.com/v1/payments/search?preapproval_id=${userPlan.subscription_id}&sort=date_created&criteria=desc`,
-      {
-        headers: {
-          "Authorization": `Bearer ${process.env.MP_ACCESS_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    console.log(`📋 User plan found. Subscription ID: ${userPlan.subscription_id || 'none'}`);
 
-    if (!searchResponse.ok) {
-      console.error("MercadoPago API error:", await searchResponse.text());
-      return NextResponse.json(
-        { error: "Failed to fetch payments from MercadoPago" },
-        { status: searchResponse.status }
-      );
+    let allPayments: any[] = [];
+
+    // Try to fetch payments using multiple methods:
+
+    // Method 1: If there's a subscription_id, fetch payments by preapproval_id (subscription)
+    if (userPlan.subscription_id) {
+      try {
+        const subscriptionResponse = await fetch(
+          `https://api.mercadopago.com/v1/payments/search?preapproval_id=${userPlan.subscription_id}&sort=date_created&criteria=desc`,
+          {
+            headers: {
+              "Authorization": `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (subscriptionResponse.ok) {
+          const subscriptionData = await subscriptionResponse.json();
+          if (subscriptionData.results) {
+            allPayments = [...allPayments, ...subscriptionData.results];
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching subscription payments:", err);
+      }
     }
 
-    const searchData = await searchResponse.json();
+    // Method 2: Search by external_reference (userId-planId-billing)
+    // This catches one-time payments that use the userId in external_reference
+    try {
+      const externalRefResponse = await fetch(
+        `https://api.mercadopago.com/v1/payments/search?external_reference=${userId}&sort=date_created&criteria=desc`,
+        {
+          headers: {
+            "Authorization": `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (externalRefResponse.ok) {
+        const externalRefData = await externalRefResponse.json();
+        if (externalRefData.results) {
+          // Filter out duplicates based on payment ID
+          const existingIds = new Set(allPayments.map((p: any) => p.id));
+          const newPayments = externalRefData.results.filter((p: any) => !existingIds.has(p.id));
+          allPayments = [...allPayments, ...newPayments];
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching payments by external reference:", err);
+    }
+
+    // Sort by date created (most recent first)
+    allPayments.sort((a: any, b: any) =>
+      new Date(b.date_created).getTime() - new Date(a.date_created).getTime()
+    );
+
+    console.log(`✅ Found ${allPayments.length} total payments for user ${userId}`);
+
+    const searchData = { results: allPayments };
 
     interface MercadoPagoPayment {
       id: string;

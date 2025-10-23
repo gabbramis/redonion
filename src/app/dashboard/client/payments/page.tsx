@@ -152,9 +152,15 @@ export default function PaymentsPage() {
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
               No hay pagos registrados
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Aún no has realizado ningún pago.
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Aún no has realizado ningún pago. Una vez que contrates un plan, tus pagos aparecerán aquí.
             </p>
+            <button
+              onClick={() => router.push("/dashboard/client")}
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
+            >
+              Ver Planes Disponibles
+            </button>
           </motion.div>
         ) : (
           <motion.div
