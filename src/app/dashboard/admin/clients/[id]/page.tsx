@@ -336,12 +336,20 @@ export default function ManageClientPage() {
                 </div>
               )}
             </div>
-            <Link
-              href={`/dashboard/admin/clients/${clientId}/preview`}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-colors"
-            >
-              Vista Previa
-            </Link>
+            <div className="flex gap-3">
+              <Link
+                href={`/dashboard/admin/clients/${clientId}/dashboard`}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
+              >
+                Gestionar Dashboard
+              </Link>
+              <Link
+                href={`/dashboard/admin/clients/${clientId}/preview`}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-colors"
+              >
+                Vista Previa
+              </Link>
+            </div>
           </div>
         </motion.div>
 

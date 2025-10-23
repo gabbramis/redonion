@@ -70,7 +70,10 @@ export async function POST(request: Request) {
         };
 
         // Insert or update user_plans table
-        const { error } = await supabase.from("user_plans").upsert({
+        console.log(`💾 Attempting to upsert user_plan for user ${userId}...`);
+        console.log(`📝 Plan details: ${planNames[planTier] || planTier}, tier: ${planTier}, billing: ${billing}`);
+
+        const planData = {
           user_id: userId,
           plan_name: planNames[planTier] || planTier,
           plan_tier: planTier,
@@ -84,16 +87,24 @@ export async function POST(request: Request) {
           billing_frequency: billing === 'annual' ? 12 : 1,
           billing_period: 'months',
           start_date: new Date().toISOString(),
-        }, {
-          onConflict: "user_id"
-        });
+        };
+
+        const { data: upsertedData, error } = await supabase
+          .from("user_plans")
+          .upsert(planData, {
+            onConflict: "user_id"
+          })
+          .select();
 
         if (error) {
           console.error("❌ Error upserting user_plan:", error);
-          return NextResponse.json({ error: "Database error" }, { status: 500 });
+          console.error("❌ Error details:", JSON.stringify(error, null, 2));
+          console.error("❌ Attempted data:", JSON.stringify(planData, null, 2));
+          return NextResponse.json({ error: "Database error", details: error.message }, { status: 500 });
         }
 
         console.log(`✅ Payment approved for user ${userId}, plan ${planTier} (${billing})`);
+        console.log(`✅ Upserted data:`, JSON.stringify(upsertedData, null, 2));
       }
 
       return NextResponse.json({ received: true });
@@ -160,7 +171,9 @@ export async function POST(request: Request) {
         const priceUYU = subscriptionData.auto_recurring?.transaction_amount || 0;
 
         // Insert or update user_plans table
-        const { error } = await supabase.from("user_plans").upsert({
+        console.log(`💾 Attempting to upsert subscription for user ${userId}...`);
+
+        const planUpsertData = {
           user_id: userId,
           plan_name: planNames[planTier] || planTier,
           plan_tier: planTier,
@@ -174,16 +187,24 @@ export async function POST(request: Request) {
           billing_frequency: frequency, // Store the frequency (1 or 12)
           billing_period: frequencyType, // Store the period type (months or years)
           start_date: new Date().toISOString(),
-        }, {
-          onConflict: "user_id"
-        });
+        };
+
+        const { data: upsertedData, error } = await supabase
+          .from("user_plans")
+          .upsert(planUpsertData, {
+            onConflict: "user_id"
+          })
+          .select();
 
         if (error) {
           console.error("❌ Error upserting user_plan:", error);
-          return NextResponse.json({ error: "Database error" }, { status: 500 });
+          console.error("❌ Error details:", JSON.stringify(error, null, 2));
+          console.error("❌ Attempted data:", JSON.stringify(planUpsertData, null, 2));
+          return NextResponse.json({ error: "Database error", details: error.message }, { status: 500 });
         }
 
         console.log(`✅ Subscription activated for user ${userId}, plan ${planTier}`);
+        console.log(`✅ Upserted data:`, JSON.stringify(upsertedData, null, 2));
       }
     }
 
