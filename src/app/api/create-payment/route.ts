@@ -11,7 +11,9 @@ interface CartItem {
 
 export async function POST(request: Request) {
   try {
-    const { planName, price, billing, cart } = await request.json();
+    const { planId, planName, price, billing, cart, userId, userEmail } = await request.json();
+
+    console.log(`🔵 Creating payment for user ${userId}, plan ${planId}, billing ${billing}`);
 
     // Calculate total price including extras from cart
     let totalPrice = 0;
@@ -42,8 +44,14 @@ export async function POST(request: Request) {
     // Remove trailing slash from app URL to avoid double slashes
     const appUrl = (process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/$/, '');
 
+    // Create external_reference with format: userId-planId-billing
+    const externalReference = `${userId}-${planId}-${billing}`;
+    console.log(`📋 External reference: ${externalReference}`);
+
     const planData = {
       reason: planName,
+      external_reference: externalReference,
+      payer_email: userEmail,
       auto_recurring: {
         frequency: frequency,
         frequency_type: frequencyType,
@@ -53,9 +61,9 @@ export async function POST(request: Request) {
       back_url: `${appUrl}/payment/success`,
     };
 
-    console.log("📤 Creating plan:", JSON.stringify(planData, null, 2));
+    console.log("📤 Creating subscription plan:", JSON.stringify(planData, null, 2));
 
-    // Step 3: Create plan in MercadoPago
+    // Step 1: Create subscription plan in MercadoPago
     const planResponse = await fetch("https://api.mercadopago.com/preapproval_plan", {
       method: "POST",
       headers: {
@@ -82,14 +90,48 @@ export async function POST(request: Request) {
       );
     }
 
-    // Step 4: Return the plan's init_point for user to subscribe
-    // The plan itself has an init_point that redirects users to subscribe
+    // Step 2: Create preapproval (subscription) for the user
+    const subscriptionData = {
+      preapproval_plan_id: planResponseData.id,
+      reason: planName,
+      external_reference: externalReference,
+      payer_email: userEmail,
+      back_url: `${appUrl}/payment/success`,
+      status: "pending",
+    };
 
-    console.log("✅ Plan created successfully, returning init_point");
+    console.log("📤 Creating subscription (preapproval):", JSON.stringify(subscriptionData, null, 2));
+
+    const subscriptionResponse = await fetch("https://api.mercadopago.com/preapproval", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+      },
+      body: JSON.stringify(subscriptionData),
+    });
+
+    const subscriptionResponseData = await subscriptionResponse.json();
+    console.log("📥 MercadoPago subscription response:", JSON.stringify(subscriptionResponseData, null, 2));
+
+    if (!subscriptionResponse.ok) {
+      console.error("❌ MercadoPago subscription error:", subscriptionResponseData);
+      return NextResponse.json(
+        {
+          error: "Error creating subscription",
+          details: subscriptionResponseData,
+          mpStatus: subscriptionResponse.status
+        },
+        { status: subscriptionResponse.status }
+      );
+    }
+
+    console.log("✅ Subscription created successfully, returning init_point");
 
     return NextResponse.json({
-      preapprovalPlanId: planResponseData.id,
-      initPoint: planResponseData.init_point,
+      preapprovalId: subscriptionResponseData.id,
+      initPoint: subscriptionResponseData.init_point,
+      sandboxInitPoint: subscriptionResponseData.sandbox_init_point,
     });
   } catch (error) {
     console.error("❌ Subscription error:", error);
