@@ -140,12 +140,35 @@ export async function POST(request: Request) {
 
       // Only process authorized/active subscriptions
       if (subscriptionData.status === "authorized" || subscriptionData.status === "approved") {
-        // Parse external_reference (format: userId-planId)
+        // Parse external_reference (format: userId-planId-billing OR userId-planId)
         const externalRef = subscriptionData.external_reference;
-        const [userId, planTier] = externalRef ? externalRef.split("-") : [null, null];
+        console.log(`🔍 External reference from subscription: ${externalRef}`);
+
+        const parts = externalRef ? externalRef.split("-") : [];
+        const userId = parts[0];
+        const planTier = parts[1];
+        const billing = parts[2] || 'monthly'; // Default to monthly if not specified
 
         if (!userId || !planTier) {
           console.error("❌ Invalid external_reference:", externalRef);
+          console.error("❌ Parsed parts:", { userId, planTier, billing });
+
+          // Try to get user from payer email as fallback
+          const payerEmail = subscriptionData.payer_email;
+          console.log(`🔍 Attempting to find user by email: ${payerEmail}`);
+
+          if (payerEmail) {
+            // We'll need to query Supabase for the user
+            const { data: authUser } = await supabase.auth.admin.listUsers();
+            const user = authUser?.users?.find(u => u.email === payerEmail);
+
+            if (user) {
+              console.log(`✅ Found user by email: ${user.id}`);
+              // Continue with this user ID
+              // But we still don't know the plan tier, so we'll skip this for now
+            }
+          }
+
           return NextResponse.json({ error: "Invalid reference" }, { status: 400 });
         }
 
@@ -177,7 +200,7 @@ export async function POST(request: Request) {
           user_id: userId,
           plan_name: planNames[planTier] || planTier,
           plan_tier: planTier,
-          billing_type: frequency === 12 ? 'annual' : 'monthly',
+          billing_type: billing || (frequency === 12 ? 'annual' : 'monthly'),
           price: priceUYU, // Store in UYU
           features: [], // Will be populated later if needed
           status: "active",

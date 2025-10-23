@@ -63,7 +63,8 @@ export async function POST(request: Request) {
 
     console.log("📤 Creating subscription plan:", JSON.stringify(planData, null, 2));
 
-    // Step 1: Create subscription plan in MercadoPago
+    // Create subscription plan in MercadoPago
+    // The plan's init_point will allow users to subscribe with their details
     const planResponse = await fetch("https://api.mercadopago.com/preapproval_plan", {
       method: "POST",
       headers: {
@@ -90,48 +91,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // Step 2: Create preapproval (subscription) for the user
-    const subscriptionData = {
-      preapproval_plan_id: planResponseData.id,
-      reason: planName,
-      external_reference: externalReference,
-      payer_email: userEmail,
-      back_url: `${appUrl}/payment/success`,
-      status: "pending",
-    };
-
-    console.log("📤 Creating subscription (preapproval):", JSON.stringify(subscriptionData, null, 2));
-
-    const subscriptionResponse = await fetch("https://api.mercadopago.com/preapproval", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.MP_ACCESS_TOKEN}`,
-      },
-      body: JSON.stringify(subscriptionData),
-    });
-
-    const subscriptionResponseData = await subscriptionResponse.json();
-    console.log("📥 MercadoPago subscription response:", JSON.stringify(subscriptionResponseData, null, 2));
-
-    if (!subscriptionResponse.ok) {
-      console.error("❌ MercadoPago subscription error:", subscriptionResponseData);
-      return NextResponse.json(
-        {
-          error: "Error creating subscription",
-          details: subscriptionResponseData,
-          mpStatus: subscriptionResponse.status
-        },
-        { status: subscriptionResponse.status }
-      );
-    }
-
-    console.log("✅ Subscription created successfully, returning init_point");
+    console.log("✅ Subscription plan created successfully");
+    console.log(`📋 Plan ID: ${planResponseData.id}`);
+    console.log(`📋 External Reference: ${externalReference}`);
 
     return NextResponse.json({
-      preapprovalId: subscriptionResponseData.id,
-      initPoint: subscriptionResponseData.init_point,
-      sandboxInitPoint: subscriptionResponseData.sandbox_init_point,
+      preapprovalPlanId: planResponseData.id,
+      initPoint: planResponseData.init_point,
     });
   } catch (error) {
     console.error("❌ Subscription error:", error);
