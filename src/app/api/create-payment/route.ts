@@ -11,9 +11,7 @@ interface CartItem {
 
 export async function POST(request: Request) {
   try {
-    const { planId, planName, price, billing, cart, userId, userEmail } = await request.json();
-
-    console.log(`🔵 Creating payment for user ${userId}, plan ${planId}, billing ${billing}`);
+    const { planName, price, billing, cart } = await request.json();
 
     // Calculate total price including extras from cart
     let totalPrice = 0;
@@ -44,14 +42,8 @@ export async function POST(request: Request) {
     // Remove trailing slash from app URL to avoid double slashes
     const appUrl = (process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/$/, '');
 
-    // Create external_reference with format: userId-planId-billing
-    const externalReference = `${userId}-${planId}-${billing}`;
-    console.log(`📋 External reference: ${externalReference}`);
-
     const planData = {
       reason: planName,
-      external_reference: externalReference,
-      payer_email: userEmail,
       auto_recurring: {
         frequency: frequency,
         frequency_type: frequencyType,
@@ -61,10 +53,9 @@ export async function POST(request: Request) {
       back_url: `${appUrl}/payment/success`,
     };
 
-    console.log("📤 Creating subscription plan:", JSON.stringify(planData, null, 2));
+    console.log("📤 Creating plan:", JSON.stringify(planData, null, 2));
 
-    // Create subscription plan in MercadoPago
-    // The plan's init_point will allow users to subscribe with their details
+    // Step 3: Create plan in MercadoPago
     const planResponse = await fetch("https://api.mercadopago.com/preapproval_plan", {
       method: "POST",
       headers: {
@@ -91,13 +82,18 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log("✅ Subscription plan created successfully");
-    console.log(`📋 Plan ID: ${planResponseData.id}`);
-    console.log(`📋 External Reference: ${externalReference}`);
+    // Step 4: Return the plan's init_point for user to subscribe
+    // The plan itself has an init_point that redirects users to subscribe
+
+    console.log("✅ Plan created successfully");
+    console.log("📋 Plan ID:", planResponseData.id);
+    console.log("🔗 Init Point:", planResponseData.init_point);
+    console.log("🔗 Sandbox Init Point:", planResponseData.sandbox_init_point);
 
     return NextResponse.json({
       preapprovalPlanId: planResponseData.id,
-      initPoint: planResponseData.init_point,
+      initPoint: planResponseData.init_point || planResponseData.sandbox_init_point,
+      sandboxInitPoint: planResponseData.sandbox_init_point,
     });
   } catch (error) {
     console.error("❌ Subscription error:", error);

@@ -260,6 +260,9 @@ export default function ClientDashboard() {
 
       const data = await response.json();
 
+      console.log("📦 Payment API response:", data);
+      console.log("🔗 Redirecting to:", data.initPoint || data.sandboxInitPoint);
+
       // Redirect to MercadoPago subscription page
       window.location.href = data.initPoint || data.sandboxInitPoint;
     } catch (error) {
