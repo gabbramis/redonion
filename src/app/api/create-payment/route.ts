@@ -67,6 +67,9 @@ export async function POST(request: Request) {
 
     const planResponseData = await planResponse.json();
     console.log("📥 MercadoPago plan response:", JSON.stringify(planResponseData, null, 2));
+    console.log("📊 Plan status:", planResponseData.status);
+    console.log("📊 Plan collector_id:", planResponseData.collector_id);
+    console.log("📊 Plan reason:", planResponseData.reason);
 
     if (!planResponse.ok) {
       console.error("❌ MercadoPago plan error:", planResponseData);
