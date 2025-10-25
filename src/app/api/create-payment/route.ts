@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     const subscriptionData = {
       reason: planName,
       external_reference: externalReference,
-      payer_email: userEmail,
+      // payer_email removed to allow any MercadoPago account to complete payment
       auto_recurring: {
         frequency: frequency,
         frequency_type: frequencyType,
