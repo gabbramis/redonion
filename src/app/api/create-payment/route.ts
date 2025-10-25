@@ -11,7 +11,7 @@ interface CartItem {
 
 export async function POST(request: Request) {
   try {
-    const { planId, planName, price, billing, cart, userId, userEmail } = await request.json();
+    const { planName, price, billing, cart } = await request.json();
 
     // Calculate total price including extras from cart
     let totalPrice = 0;
@@ -42,64 +42,61 @@ export async function POST(request: Request) {
     // Remove trailing slash from app URL to avoid double slashes
     const appUrl = (process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/$/, '');
 
-    // Create external reference for webhook tracking
-    const externalReference = `${userId}-${planId}-${billing}`;
-
-    // Create a direct subscription (preapproval) instead of a plan template
-    const subscriptionData = {
+    const planData = {
       reason: planName,
-      external_reference: externalReference,
-      payer_email: userEmail,
       auto_recurring: {
         frequency: frequency,
         frequency_type: frequencyType,
         transaction_amount: priceInUYU,
         currency_id: process.env.MP_CURRENCY || "UYU",
-        free_trial: {
-          frequency: 0,
-          frequency_type: "months"
-        }
       },
       back_url: `${appUrl}/payment/success`,
-      status: "pending"
     };
 
-    console.log("📤 Creating direct subscription (not plan template):", JSON.stringify(subscriptionData, null, 2));
+    console.log("📤 Creating plan:", JSON.stringify(planData, null, 2));
 
-    // Create subscription directly using /preapproval endpoint
-    const subscriptionResponse = await fetch("https://api.mercadopago.com/preapproval", {
+    // Step 3: Create plan in MercadoPago
+    const planResponse = await fetch("https://api.mercadopago.com/preapproval_plan", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.MP_ACCESS_TOKEN}`,
       },
-      body: JSON.stringify(subscriptionData),
+      body: JSON.stringify(planData),
     });
 
-    const subscriptionResponseData = await subscriptionResponse.json();
-    console.log("📥 MercadoPago subscription response:", JSON.stringify(subscriptionResponseData, null, 2));
+    const planResponseData = await planResponse.json();
+    console.log("📥 MercadoPago plan response:", JSON.stringify(planResponseData, null, 2));
+    console.log("📊 Plan status:", planResponseData.status);
+    console.log("📊 Plan collector_id:", planResponseData.collector_id);
+    console.log("📊 Plan reason:", planResponseData.reason);
 
-    if (!subscriptionResponse.ok) {
-      console.error("❌ MercadoPago subscription error:", subscriptionResponseData);
-      console.error("❌ Full request data was:", subscriptionData);
+    if (!planResponse.ok) {
+      console.error("❌ MercadoPago plan error:", planResponseData);
+      console.error("❌ Full request data was:", planData);
       return NextResponse.json(
         {
-          error: "Error creating subscription",
-          details: subscriptionResponseData,
-          requestData: subscriptionData,
-          mpStatus: subscriptionResponse.status
+          error: "Error creating plan",
+          details: planResponseData,
+          requestData: planData,
+          mpStatus: planResponse.status
         },
-        { status: subscriptionResponse.status }
+        { status: planResponse.status }
       );
     }
 
-    console.log("✅ Subscription created successfully");
-    console.log("🔗 Init Point:", subscriptionResponseData.init_point);
+    // Step 4: Return the plan's init_point for user to subscribe
+    // The plan itself has an init_point that redirects users to subscribe
+
+    console.log("✅ Plan created successfully");
+    console.log("📋 Plan ID:", planResponseData.id);
+    console.log("🔗 Init Point:", planResponseData.init_point);
+    console.log("🔗 Sandbox Init Point:", planResponseData.sandbox_init_point);
 
     return NextResponse.json({
-      preapprovalId: subscriptionResponseData.id,
-      initPoint: subscriptionResponseData.init_point,
-      sandboxInitPoint: subscriptionResponseData.sandbox_init_point,
+      preapprovalPlanId: planResponseData.id,
+      initPoint: planResponseData.init_point || planResponseData.sandbox_init_point,
+      sandboxInitPoint: planResponseData.sandbox_init_point,
     });
   } catch (error) {
     console.error("❌ Subscription error:", error);
