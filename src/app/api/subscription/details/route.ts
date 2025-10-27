@@ -28,15 +28,17 @@ export async function GET(request: Request) {
     if (planError || !userPlan) {
       return NextResponse.json({
         subscription: null,
-        message: "No active subscription found"
+        message: "No active plan found"
       });
     }
 
-    // If there's a subscription_id, fetch details from MercadoPago
-    let mpSubscription = null;
+    // Note: subscription_id now stores payment_id for one-time payments
+    // We keep the field name for backward compatibility with existing data
+    let mpPayment = null;
     if (userPlan.subscription_id) {
-      const mpResponse = await fetch(
-        `https://api.mercadopago.com/preapproval/${userPlan.subscription_id}`,
+      // Try to fetch as payment first (one-time payments)
+      const paymentResponse = await fetch(
+        `https://api.mercadopago.com/v1/payments/${userPlan.subscription_id}`,
         {
           headers: {
             "Authorization": `Bearer ${process.env.MP_ACCESS_TOKEN}`,
@@ -45,8 +47,22 @@ export async function GET(request: Request) {
         }
       );
 
-      if (mpResponse.ok) {
-        mpSubscription = await mpResponse.json();
+      if (paymentResponse.ok) {
+        mpPayment = await paymentResponse.json();
+      } else {
+        // Fallback: try as subscription for legacy data
+        const subResponse = await fetch(
+          `https://api.mercadopago.com/preapproval/${userPlan.subscription_id}`,
+          {
+            headers: {
+              "Authorization": `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (subResponse.ok) {
+          mpPayment = await subResponse.json();
+        }
       }
     }
 
@@ -57,16 +73,16 @@ export async function GET(request: Request) {
       planTier: userPlan.plan_tier,
       billingType: userPlan.billing_type,
       price: userPlan.price,
-      currency: mpSubscription?.auto_recurring?.currency_id || "UYU",
+      currency: mpPayment?.currency_id || mpPayment?.auto_recurring?.currency_id || "UYU",
       status: userPlan.status,
       subscriptionStart: userPlan.subscription_start,
       subscriptionEnd: userPlan.subscription_end,
       billingFrequency: userPlan.billing_frequency,
       billingPeriod: userPlan.billing_period,
-      nextBillingDate: mpSubscription?.next_payment_date || null,
+      nextBillingDate: mpPayment?.next_payment_date || null,
       features: userPlan.features || [],
-      mpStatus: mpSubscription?.status || null,
-      mpReason: mpSubscription?.reason || null,
+      mpStatus: mpPayment?.status || null,
+      mpReason: mpPayment?.reason || mpPayment?.description || null,
     };
 
     return NextResponse.json({ subscription });

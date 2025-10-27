@@ -31,10 +31,7 @@ export async function POST(request: Request) {
       totalPrice = billing === "annual" ? price * 12 : price;
     }
 
-    const frequency = billing === "annual" ? 12 : 1;
-    const frequencyType = "months";
-
-    console.log(`💵 Converting $${totalPrice} USD to UYU (${billing} billing, frequency: ${frequency} ${frequencyType})...`);
+    console.log(`💵 Converting $${totalPrice} USD to UYU (${billing} billing)...`);
     console.log(`🛒 Cart items:`, cart);
     const priceInUYU = await convertUSDtoUYU(totalPrice);
     console.log(`💵 Converted: $${totalPrice} USD = $${priceInUYU} UYU`);
@@ -45,66 +42,71 @@ export async function POST(request: Request) {
     // Create external reference for webhook tracking
     const externalReference = `${userId}-${planId}-${billing}`;
 
-    // Create a direct subscription (preapproval) instead of a plan template
-    const subscriptionData = {
-      reason: planName,
-      external_reference: externalReference,
-      // payer_email removed to allow any MercadoPago account to complete payment
-      auto_recurring: {
-        frequency: frequency,
-        frequency_type: frequencyType,
-        transaction_amount: priceInUYU,
-        currency_id: process.env.MP_CURRENCY || "UYU",
-        free_trial: {
-          frequency: 0,
-          frequency_type: "months"
+    // Create a one-time payment preference
+    const preferenceData = {
+      items: [
+        {
+          title: planName,
+          description: `${planName} - ${billing === "annual" ? "Pago anual" : "Pago mensual"}`,
+          quantity: 1,
+          unit_price: priceInUYU,
+          currency_id: process.env.MP_CURRENCY || "UYU",
         }
+      ],
+      external_reference: externalReference,
+      payer: {
+        email: userEmail,
       },
-      back_url: `${appUrl}/payment/success`,
-      status: "pending"
+      back_urls: {
+        success: `${appUrl}/payment/success`,
+        failure: `${appUrl}/payment/failure`,
+        pending: `${appUrl}/payment/pending`,
+      },
+      auto_return: "approved",
+      statement_descriptor: "RedOnion Marketing",
     };
 
-    console.log("📤 Creating direct subscription (not plan template):", JSON.stringify(subscriptionData, null, 2));
+    console.log("📤 Creating one-time payment preference:", JSON.stringify(preferenceData, null, 2));
 
-    // Create subscription directly using /preapproval endpoint
-    const subscriptionResponse = await fetch("https://api.mercadopago.com/preapproval", {
+    // Create payment preference using /checkout/preferences endpoint
+    const preferenceResponse = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.MP_ACCESS_TOKEN}`,
       },
-      body: JSON.stringify(subscriptionData),
+      body: JSON.stringify(preferenceData),
     });
 
-    const subscriptionResponseData = await subscriptionResponse.json();
-    console.log("📥 MercadoPago subscription response:", JSON.stringify(subscriptionResponseData, null, 2));
+    const preferenceResponseData = await preferenceResponse.json();
+    console.log("📥 MercadoPago preference response:", JSON.stringify(preferenceResponseData, null, 2));
 
-    if (!subscriptionResponse.ok) {
-      console.error("❌ MercadoPago subscription error:", subscriptionResponseData);
-      console.error("❌ Full request data was:", subscriptionData);
+    if (!preferenceResponse.ok) {
+      console.error("❌ MercadoPago preference error:", preferenceResponseData);
+      console.error("❌ Full request data was:", preferenceData);
       return NextResponse.json(
         {
-          error: "Error creating subscription",
-          details: subscriptionResponseData,
-          requestData: subscriptionData,
-          mpStatus: subscriptionResponse.status
+          error: "Error creating payment",
+          details: preferenceResponseData,
+          requestData: preferenceData,
+          mpStatus: preferenceResponse.status
         },
-        { status: subscriptionResponse.status }
+        { status: preferenceResponse.status }
       );
     }
 
-    console.log("✅ Subscription created successfully");
-    console.log("🔗 Init Point:", subscriptionResponseData.init_point);
+    console.log("✅ Payment preference created successfully");
+    console.log("🔗 Init Point:", preferenceResponseData.init_point);
 
     return NextResponse.json({
-      preapprovalId: subscriptionResponseData.id,
-      initPoint: subscriptionResponseData.init_point,
-      sandboxInitPoint: subscriptionResponseData.sandbox_init_point,
+      preferenceId: preferenceResponseData.id,
+      initPoint: preferenceResponseData.init_point,
+      sandboxInitPoint: preferenceResponseData.sandbox_init_point,
     });
   } catch (error) {
-    console.error("❌ Subscription error:", error);
+    console.error("❌ Payment error:", error);
     return NextResponse.json(
-      { error: "Error creating subscription" },
+      { error: "Error creating payment" },
       { status: 500 }
     );
   }

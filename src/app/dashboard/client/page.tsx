@@ -7,6 +7,8 @@ import Image from "next/image";
 import { VisaIcon } from "@/components/ui/icons/brandico-visa";
 import { MastercardIcon } from "@/components/ui/icons/brandico-mastercard";
 import { initMercadoPago } from "@mercadopago/sdk-react";
+import { MercadoPagoSubscriptionScript } from "@/components/mercadopago-subscription-script";
+import { getMPSubscriptionPlan } from "@/lib/mercadopago-plans";
 
 interface Plan {
   id: string;
@@ -221,6 +223,18 @@ export default function ClientDashboard() {
       return;
     }
 
+    // Check if annual billing is selected (not yet supported)
+    if (billing === "annual") {
+      alert("Los planes anuales estarán disponibles próximamente. Por favor selecciona la opción mensual.");
+      return;
+    }
+
+    // Check if extras are selected (subscriptions don't support extras yet)
+    if (cart.length > 1) {
+      alert("Los extras no están disponibles con suscripciones aún. Por favor continúa solo con el plan base o contáctanos para agregar extras.");
+      return;
+    }
+
     setProcessingPayment(true);
     try {
       // Get current user
@@ -234,37 +248,31 @@ export default function ClientDashboard() {
         return;
       }
 
-      // Get the base plan price (monthly rate for annual, or monthly price for monthly)
-      const planPrice = billing === "monthly"
-        ? selectedPlan.price
-        : selectedPlan.annualPrice;
+      // Get the MercadoPago subscription plan
+      const mpPlan = getMPSubscriptionPlan(selectedPlan.id, billing);
 
-      // Create subscription with MercadoPago
-      const response = await fetch("/api/create-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          planId: selectedPlan.id,
-          planName: selectedPlan.name,
-          price: planPrice,
-          userId: user.id,
-          userEmail: user.email,
-          billing: billing,
-          cart: cart, // Include the full cart with extras
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al crear la suscripción");
+      if (!mpPlan) {
+        alert("Plan de suscripción no encontrado. Por favor contacta con soporte.");
+        setProcessingPayment(false);
+        return;
       }
 
-      const data = await response.json();
+      console.log("🔄 Redirecting to subscription checkout for:", mpPlan.planName);
+      console.log("👤 User:", user.email);
+      console.log("📝 User will be matched by email in webhook");
 
-      console.log("📦 Payment API response:", data);
-      console.log("🔗 Redirecting to:", data.initPoint || data.sandboxInitPoint);
+      // Store pending subscription in localStorage for tracking
+      localStorage.setItem('pending_subscription', JSON.stringify({
+        userId: user.id,
+        userEmail: user.email,
+        planId: selectedPlan.id,
+        billing: billing,
+        timestamp: new Date().toISOString()
+      }));
 
-      // Redirect to MercadoPago subscription page
-      window.location.href = data.initPoint || data.sandboxInitPoint;
+      // Redirect directly to MercadoPago subscription checkout
+      // User will be matched by email in the webhook
+      window.location.href = mpPlan.checkoutUrl;
     } catch (error) {
       console.error("Error:", error);
       alert("Error al procesar la suscripción. Por favor intenta nuevamente.");
@@ -274,7 +282,11 @@ export default function ClientDashboard() {
   };
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-8">
+    <>
+      {/* Load MercadoPago subscription script */}
+      <MercadoPagoSubscriptionScript />
+
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -596,10 +608,10 @@ export default function ClientDashboard() {
                     </div>
                   </div>
 
-                  {/* Subscription Payment Section */}
+                  {/* Payment Section */}
                   <div className="mb-4">
                     <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                      Suscripción
+                      Método de Pago
                     </h4>
 
                     <div className="space-y-2">
@@ -670,19 +682,20 @@ export default function ClientDashboard() {
                       </button>
 
                       <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
-                        Serás redirigido a MercadoPago para completar tu suscripción
+                        Serás redirigido a MercadoPago para completar tu pago
                       </p>
                     </div>
                   </div>
 
                   <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-3">
-                    🔒 Suscripción segura • Cancela cuando quieras
+                    🔒 Pago seguro y protegido
                   </p>
                 </>
               )}
             </motion.div>
           </div>
         </div>
-    </div>
+      </div>
+    </>
   );
 }

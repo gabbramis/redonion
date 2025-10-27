@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 
     console.log("📥 Webhook received:", JSON.stringify(body, null, 2));
 
-    // Handle one-time payment events
+    // Handle one-time payment events (PRIMARY FLOW)
     if (body.type === "payment") {
       const paymentId = body.data?.id;
 
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
           price: paymentData.transaction_amount,
           features: [],
           status: "active",
-          subscription_id: paymentData.id.toString(),
+          subscription_id: paymentData.id.toString(), // Store payment ID for reference
           subscription_start: new Date().toISOString(),
           subscription_end: endDate.toISOString(),
           billing_frequency: billing === 'annual' ? 12 : 1,
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true });
     }
 
-    // Handle subscription events (preapproval) - keeping for future use
+    // Handle subscription events (preapproval) - NEW: Match users by email
     if (body.type === "subscription_preapproval" || body.action === "created") {
       const preapprovalId = body.data?.id;
 
@@ -140,37 +140,46 @@ export async function POST(request: Request) {
 
       // Only process authorized/active subscriptions
       if (subscriptionData.status === "authorized" || subscriptionData.status === "approved") {
-        // Parse external_reference (format: userId-planId-billing OR userId-planId)
-        const externalRef = subscriptionData.external_reference;
-        console.log(`🔍 External reference from subscription: ${externalRef}`);
+        // Get payer email to match user
+        const payerEmail = subscriptionData.payer_email;
+        console.log(`🔍 Looking for user with email: ${payerEmail}`);
 
-        const parts = externalRef ? externalRef.split("-") : [];
-        const userId = parts[0];
-        const planTier = parts[1];
-        const billing = parts[2] || 'monthly'; // Default to monthly if not specified
-
-        if (!userId || !planTier) {
-          console.error("❌ Invalid external_reference:", externalRef);
-          console.error("❌ Parsed parts:", { userId, planTier, billing });
-
-          // Try to get user from payer email as fallback
-          const payerEmail = subscriptionData.payer_email;
-          console.log(`🔍 Attempting to find user by email: ${payerEmail}`);
-
-          if (payerEmail) {
-            // We'll need to query Supabase for the user
-            const { data: authUser } = await supabase.auth.admin.listUsers();
-            const user = authUser?.users?.find(u => u.email === payerEmail);
-
-            if (user) {
-              console.log(`✅ Found user by email: ${user.id}`);
-              // Continue with this user ID
-              // But we still don't know the plan tier, so we'll skip this for now
-            }
-          }
-
-          return NextResponse.json({ error: "Invalid reference" }, { status: 400 });
+        if (!payerEmail) {
+          console.error("❌ No payer email in subscription data");
+          return NextResponse.json({ error: "No payer email" }, { status: 400 });
         }
+
+        // Find user by email in Supabase auth
+        const { data: authData } = await supabase.auth.admin.listUsers();
+        const user = authData?.users?.find(u => u.email?.toLowerCase() === payerEmail.toLowerCase());
+
+        if (!user) {
+          console.error("❌ User not found with email:", payerEmail);
+          return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+
+        console.log(`✅ Found user: ${user.id} (${user.email})`);
+
+        // Determine plan tier from preapproval_plan_id
+        const planIdMapping: Record<string, string> = {
+          'bfa3e0177a4f4d708d024a967c4d62b1': 'test',
+          'f01e8dd4a8e447179bb49f232a69d053': 'basico',
+          '50d7fb9c86944e91a8e979be18213f2f': 'estandar',
+          '0af7a3e5d28c4c008e214fa07abe044f': 'premium',
+        };
+
+        const preapprovalPlanId = subscriptionData.preapproval_plan_id;
+        const planTier = planIdMapping[preapprovalPlanId];
+
+        if (!planTier) {
+          console.error("❌ Unknown preapproval_plan_id:", preapprovalPlanId);
+          return NextResponse.json({ error: "Unknown plan" }, { status: 400 });
+        }
+
+        console.log(`📦 Detected plan: ${planTier} from preapproval_plan_id: ${preapprovalPlanId}`);
+
+        const userId = user.id;
+        const billing = 'monthly'; // All current plans are monthly
 
         // Calculate subscription end date based on frequency
         const frequency = subscriptionData.auto_recurring?.frequency || 1;

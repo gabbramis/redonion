@@ -40,7 +40,7 @@ export default function PaymentSuccess() {
           ¡Pago Exitoso!
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
-          Tu suscripción ha sido activada correctamente. Serás redirigido a tu panel de cliente en unos momentos.
+          Tu plan ha sido activado correctamente. Serás redirigido a tu panel de cliente en unos momentos.
         </p>
 
         {/* Loading indicator */}
