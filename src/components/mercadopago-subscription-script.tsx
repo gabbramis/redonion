@@ -3,6 +3,15 @@
 import { useEffect } from "react";
 
 /**
+ * Extend Window interface to include MercadoPago properties
+ */
+declare global {
+  interface Window {
+    $MPC_loaded?: boolean;
+  }
+}
+
+/**
  * MercadoPago Subscription Script Component
  * Loads the MercadoPago subscription checkout script
  * This enables the subscription checkout modal functionality
@@ -10,7 +19,7 @@ import { useEffect } from "react";
 export function MercadoPagoSubscriptionScript() {
   useEffect(() => {
     // Check if script is already loaded
-    if (typeof window !== "undefined" && (window as any).$MPC_loaded) {
+    if (typeof window !== "undefined" && window.$MPC_loaded) {
       return;
     }
 
@@ -23,7 +32,7 @@ export function MercadoPagoSubscriptionScript() {
     const firstScript = document.getElementsByTagName("script")[0];
     firstScript.parentNode?.insertBefore(script, firstScript);
 
-    (window as any).$MPC_loaded = true;
+    window.$MPC_loaded = true;
 
     // Set up message listener for modal close events
     const handleMessage = (event: MessageEvent) => {
