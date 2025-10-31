@@ -275,11 +275,6 @@ export default function ClientsPage() {
                             </svg>
                             Pagado
                           </div>
-                          {client.subscription_end && (
-                            <p className="text-gray-500 dark:text-gray-400">
-                              Vence: {client.subscription_end}
-                            </p>
-                          )}
                         </div>
                       ) : (
                         <div className="flex items-center gap-1 text-yellow-600 dark:text-yellow-400 text-xs font-medium">

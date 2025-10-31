@@ -13,13 +13,14 @@ export interface MPSubscriptionPlan {
 
 export const MP_SUBSCRIPTION_PLANS: Record<string, MPSubscriptionPlan> = {
   // Monthly plans
-  "test-monthly": {
-    planId: "test",
-    planName: "Plan Test",
-    preapprovalPlanId: "bfa3e0177a4f4d708d024a967c4d62b1",
-    billing: "monthly",
-    checkoutUrl: "https://www.mercadopago.com.uy/subscriptions/checkout?preapproval_plan_id=bfa3e0177a4f4d708d024a967c4d62b1",
-  },
+  // Commented out - can be enabled in the future
+  // "test-monthly": {
+  //   planId: "test",
+  //   planName: "Plan Test",
+  //   preapprovalPlanId: "bfa3e0177a4f4d708d024a967c4d62b1",
+  //   billing: "monthly",
+  //   checkoutUrl: "https://www.mercadopago.com.uy/subscriptions/checkout?preapproval_plan_id=bfa3e0177a4f4d708d024a967c4d62b1",
+  // },
   "basico-monthly": {
     planId: "basico",
     planName: "Plan Básico",

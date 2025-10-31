@@ -30,7 +30,15 @@
       "Bash(pnpm install:*)",
       "Bash(del \"C:\\Users\\ADMIN\\Desktop\\projects\\redonion\\src\\app\\auth\\callback\\route.ts\")",
       "Bash(pnpm add:*)",
-      "Bash(netstat:*)"
+      "Bash(netstat:*)",
+      "Bash(cmd /c \"dir /B src\\app\")",
+      "Bash(move \"src\\app\\page.tsx\" \"src\\app\\[locale]\\page.tsx\")",
+      "Bash(pnpm run dev)",
+      "Bash(pnpm uninstall:*)",
+      "Bash(git checkout:*)",
+      "Bash(timeout 10 bash:*)",
+      "Bash(nul)",
+      "Bash(timeout 3 bash:*)"
     ],
     "deny": [],
     "ask": []

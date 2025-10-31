@@ -17,9 +17,16 @@ interface Client {
 interface ApiUser {
   id: string;
   email: string;
-  plan_name: string;
+  full_name: string | null;
+  plan_name: string | null;
+  plan_tier: string | null;
   status: string;
+  price: number | null;
+  billing_type: string | null;
   created_at: string;
+  last_sign_in_at: string | null;
+  subscription_start: string | null;
+  subscription_end: string | null;
 }
 
 export default function AdminDashboard() {
@@ -34,14 +41,11 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log('🔄 Fetching clients from API...');
-
       try {
         // Get auth session to pass token
         const { data: { session } } = await supabase.auth.getSession();
 
         if (!session) {
-          console.error('❌ No session found');
           setClients([]);
           setStats({ totalClients: 0, activeClients: 0, totalPlans: 0 });
           setLoading(false);
@@ -56,8 +60,6 @@ export default function AdminDashboard() {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          console.error('❌ API error:', errorData);
           setClients([]);
           setStats({ totalClients: 0, activeClients: 0, totalPlans: 0 });
           setLoading(false);
@@ -65,39 +67,35 @@ export default function AdminDashboard() {
         }
 
         const { users } = await response.json();
-        console.log('📊 API result:', users);
 
         if (users && users.length > 0) {
-          console.log('✅ Found', users.length, 'users');
-
           const clientsList = users.map((user: ApiUser) => ({
             id: user.id,
-            name: `Cliente - ${user.plan_name}`,
+            name: user.full_name || user.email.split('@')[0],
             email: user.email,
             status: user.status,
             projects: 0,
-            lastLogin: new Date(user.created_at).toLocaleDateString('es-ES'),
+            lastLogin: user.last_sign_in_at
+              ? new Date(user.last_sign_in_at).toLocaleDateString('es-ES')
+              : 'Nunca',
           }));
           setClients(clientsList);
 
           // Calculate stats
-          const uniqueClients = new Set(users.map((u: ApiUser) => u.id)).size;
+          const totalClients = users.length;
           const activeClients = users.filter((u: ApiUser) => u.status === 'active').length;
+          const totalPlans = users.filter((u: ApiUser) => u.plan_name !== null).length;
 
           setStats({
-            totalClients: uniqueClients,
+            totalClients: totalClients,
             activeClients: activeClients,
-            totalPlans: users.length,
+            totalPlans: totalPlans,
           });
-
-          console.log('📈 Stats:', { uniqueClients, activeClients, totalPlans: users.length });
         } else {
-          console.log('⚠️ No users found in database');
           setClients([]);
           setStats({ totalClients: 0, activeClients: 0, totalPlans: 0 });
         }
-      } catch (error) {
-        console.error('❌ Error fetching data:', error);
+      } catch {
         setClients([]);
         setStats({ totalClients: 0, activeClients: 0, totalPlans: 0 });
       }
@@ -221,8 +219,14 @@ export default function AdminDashboard() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                          {client.status}
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          client.status === 'active'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                            : client.status === 'inactive'
+                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                        }`}>
+                          {client.status === 'no_plan' ? 'Sin Plan' : client.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
@@ -238,9 +242,7 @@ export default function AdminDashboard() {
                         >
                           Gestionar
                         </Link>
-                        <button className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">
-                          Ver Perfil
-                        </button>
+                        
                       </td>
                     </tr>
                   ))

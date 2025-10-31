@@ -8,25 +8,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ADMIN_EMAILS } from "@/defs/admins";
 
-interface ClientSettings {
-  userId: string;
-  dashboardSettings: {
-    showStats: boolean;
-    enabledStats: string[];
-    showActivity: boolean;
-    customMessage?: string;
-  };
-  mediaSettings: {
-    allowUpload: boolean;
-    maxFileSize: number;
-    allowedTypes: string[];
-  };
-  profileSettings: {
-    showPlanDetails: boolean;
-    allowPlanChange: boolean;
-  };
-}
-
 interface UserPlan {
   id: string;
   planName: string;
@@ -36,6 +17,37 @@ interface UserPlan {
   status: string;
 }
 
+interface Invoice {
+  id: string;
+  invoice_number: string;
+  amount: number;
+  due_date: string;
+  status: string;
+  created_at: string;
+  billing_period_start?: string;
+  billing_period_end?: string;
+  payment_date?: string;
+  payment_method?: string;
+  payment_notes?: string;
+  plan_name?: string;
+  currency?: string;
+  invoice_date?: string;
+}
+
+interface UploadedFile {
+  id?: string;
+  name?: string;
+  file_name?: string;
+  size?: number;
+  file_size?: number;
+  type?: string;
+  file_type?: string;
+  url?: string;
+  storage_path?: string;
+  created_at?: string;
+  public_url?: string;
+}
+
 export default function ManageClientPage() {
   const params = useParams();
   const clientId = params.id as string;
@@ -43,41 +55,17 @@ export default function ManageClientPage() {
   const supabase = createClient();
 
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [savingProfile, setSavingProfile] = useState(false);
   const [clientEmail, setClientEmail] = useState("");
   const [clientName, setClientName] = useState("");
-  const [editedName, setEditedName] = useState("");
-  const [editedEmail, setEditedEmail] = useState("");
   const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
-
-  // Client panel settings
-  const [settings, setSettings] = useState<ClientSettings>({
-    userId: clientId,
-    dashboardSettings: {
-      showStats: true,
-      enabledStats: ["visits", "engagement", "posts", "conversions"],
-      showActivity: true,
-      customMessage: "",
-    },
-    mediaSettings: {
-      allowUpload: true,
-      maxFileSize: 50,
-      allowedTypes: ["image", "video"],
-    },
-    profileSettings: {
-      showPlanDetails: true,
-      allowPlanChange: false,
-    },
-  });
-
-  // Available stats
-  const availableStats = [
-    { id: "visits", label: "Visitas del Sitio" },
-    { id: "engagement", label: "Engagement en Redes" },
-    { id: "posts", label: "Publicaciones del Mes" },
-    { id: "conversions", label: "Conversiones" },
-  ];
+  const [activatingSubscription, setActivatingSubscription] = useState(false);
+  const [selectedPlanTier, setSelectedPlanTier] = useState("basico");
+  const [selectedBilling, setSelectedBilling] = useState<"monthly" | "annual">("monthly");
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [creatingInvoice, setCreatingInvoice] = useState(false);
+  const [billingPeriodStart, setBillingPeriodStart] = useState("");
+  const [billingPeriodEnd, setBillingPeriodEnd] = useState("");
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
 
   useEffect(() => {
     const loadClientData = async () => {
@@ -94,16 +82,38 @@ export default function ManageClientPage() {
         return;
       }
 
-      // Fetch actual client data using the clientId
-      const { data: clientData } = await supabase.auth.admin.getUserById(clientId);
+      // Get auth session to pass token
+      const { data: { session } } = await supabase.auth.getSession();
 
-      const email = clientData?.user?.email || "cliente@test.com";
-      const name = clientData?.user?.user_metadata?.full_name || "Cliente de Prueba";
+      if (!session) {
+        console.error('❌ No session found');
+        return;
+      }
 
-      setClientEmail(email);
-      setClientName(name);
-      setEditedEmail(email);
-      setEditedName(name);
+      // Fetch client data using the admin API
+      try {
+        const response = await fetch(`/api/admin/users?id=${clientId}`, {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('❌ API error:', errorData);
+          return;
+        }
+
+        const { user: clientData } = await response.json();
+
+        const email = clientData?.email || "unknown@example.com";
+        const name = clientData?.full_name || email.split('@')[0];
+
+        setClientEmail(email);
+        setClientName(name);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
 
       // Fetch client plan
       const { data: planData } = await supabase
@@ -122,34 +132,41 @@ export default function ManageClientPage() {
           price: planData.price,
           status: planData.status,
         });
+        // Update the dropdown selectors to show the current plan
+        setSelectedPlanTier(planData.plan_tier);
+        setSelectedBilling(planData.billing_type);
       }
 
-      // Fetch client panel settings
-      const { data: settingsData } = await supabase
-        .from("client_panel_settings")
+      // Fetch invoices
+      const { data: invoicesData } = await supabase
+        .from("invoices")
         .select("*")
         .eq("user_id", clientId)
-        .single();
+        .order("invoice_date", { ascending: false });
 
-      if (settingsData) {
-        setSettings({
-          userId: clientId,
-          dashboardSettings: settingsData.dashboard_settings || {
-            showStats: true,
-            enabledStats: ["visits", "engagement", "posts", "conversions"],
-            showActivity: true,
-            customMessage: "",
-          },
-          mediaSettings: settingsData.media_settings || {
-            allowUpload: true,
-            maxFileSize: 50,
-            allowedTypes: ["image", "video"],
-          },
-          profileSettings: settingsData.profile_settings || {
-            showPlanDetails: true,
-            allowPlanChange: false,
-          },
-        });
+      if (invoicesData) {
+        setInvoices(invoicesData);
+      }
+
+      // Fetch uploaded files
+      console.log("🔍 Fetching files for client:", clientId);
+      const { data: filesData, error: filesError } = await supabase
+        .from("media_uploads")
+        .select("*")
+        .eq("user_id", clientId)
+        .order("created_at", { ascending: false });
+
+      console.log("📁 Files query result:", { filesData, filesError });
+
+      if (filesError) {
+        console.error("❌ Error fetching files:", filesError);
+      }
+
+      if (filesData) {
+        console.log("✅ Files loaded successfully:", filesData.length);
+        setUploadedFiles(filesData);
+      } else {
+        console.log("⚠️ No files data returned");
       }
 
       setLoading(false);
@@ -158,86 +175,224 @@ export default function ManageClientPage() {
     loadClientData();
   }, [clientId, router, supabase]);
 
-  const handleSaveSettings = async () => {
-    setSaving(true);
-
-    try {
-      // Upsert client panel settings (onConflict specifies the unique column)
-      const { error } = await supabase.from("client_panel_settings").upsert(
-        {
-          user_id: clientId,
-          dashboard_settings: settings.dashboardSettings,
-          media_settings: settings.mediaSettings,
-          profile_settings: settings.profileSettings,
-          updated_at: new Date().toISOString(),
-        },
-        {
-          onConflict: "user_id", // Specify the unique constraint column
-        }
-      );
-
-      if (error) throw error;
-
-      alert("Configuración guardada exitosamente");
-    } catch (err) {
-      const error = err as Error;
-      alert(`Error al guardar: ${error.message}`);
-    } finally {
-      setSaving(false);
+  const handleActivateSubscription = async () => {
+    if (!confirm(`¿Activar la suscripción de ${clientEmail}?`)) {
+      return;
     }
-  };
 
-  const handleSaveProfile = async () => {
-    setSavingProfile(true);
+    setActivatingSubscription(true);
 
     try {
-      // Update user metadata through Supabase Admin API
-      const { error } = await supabase.auth.admin.updateUserById(clientId, {
-        email: editedEmail,
-        user_metadata: {
-          full_name: editedName,
-        },
+      const response = await fetch("/api/admin/toggle-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userEmail: clientEmail,
+          action: "activate",
+          planTier: selectedPlanTier,
+          billingType: selectedBilling,
+        }),
       });
 
-      if (error) throw error;
+      const data = await response.json();
 
-      setClientEmail(editedEmail);
-      setClientName(editedName);
-      alert("Perfil actualizado exitosamente");
-    } catch (err) {
-      const error = err as Error;
-      alert(`Error al actualizar perfil: ${error.message}`);
+      if (!response.ok) {
+        throw new Error(data.error || "Error al activar la suscripción");
+      }
+
+      alert("¡Suscripción activada exitosamente!");
+
+      // Reload page to show updated plan
+      window.location.reload();
+    } catch (err: unknown) {
+      alert(`Error: ${err instanceof Error ? err.message : 'An error occurred'}`);
     } finally {
-      setSavingProfile(false);
+      setActivatingSubscription(false);
     }
   };
 
-  const toggleStat = (statId: string) => {
-    const newStats = settings.dashboardSettings.enabledStats.includes(statId)
-      ? settings.dashboardSettings.enabledStats.filter((s) => s !== statId)
-      : [...settings.dashboardSettings.enabledStats, statId];
+  const handleDeactivateSubscription = async () => {
+    if (!confirm(`¿Estás seguro de desactivar la suscripción de ${clientEmail}?`)) {
+      return;
+    }
 
-    setSettings({
-      ...settings,
-      dashboardSettings: {
-        ...settings.dashboardSettings,
-        enabledStats: newStats,
-      },
-    });
+    setActivatingSubscription(true);
+
+    try {
+      const response = await fetch("/api/admin/toggle-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userEmail: clientEmail,
+          action: "deactivate",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al desactivar la suscripción");
+      }
+
+      alert("Suscripción desactivada exitosamente");
+
+      // Reload page to show updated plan
+      window.location.reload();
+    } catch (err: unknown) {
+      alert(`Error: ${err instanceof Error ? err.message : 'An error occurred'}`);
+    } finally {
+      setActivatingSubscription(false);
+    }
   };
 
-  const toggleMediaType = (type: string) => {
-    const newTypes = settings.mediaSettings.allowedTypes.includes(type)
-      ? settings.mediaSettings.allowedTypes.filter((t) => t !== type)
-      : [...settings.mediaSettings.allowedTypes, type];
+  const handleUpdatePlan = async () => {
+    if (!confirm(`¿Actualizar el plan de ${clientEmail}?`)) {
+      return;
+    }
 
-    setSettings({
-      ...settings,
-      mediaSettings: {
-        ...settings.mediaSettings,
-        allowedTypes: newTypes,
-      },
-    });
+    setActivatingSubscription(true);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error("No hay sesión activa");
+      }
+
+      const response = await fetch("/api/admin/update-plan", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          userId: clientId,
+          planTier: selectedPlanTier,
+          billingType: selectedBilling,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al actualizar el plan");
+      }
+
+      alert("¡Plan actualizado exitosamente!");
+
+      // Reload page to show updated plan
+      window.location.reload();
+    } catch (err: unknown) {
+      alert(`Error: ${err instanceof Error ? err.message : 'An error occurred'}`);
+    } finally {
+      setActivatingSubscription(false);
+    }
+  };
+
+  const handleCreateInvoice = async () => {
+    // Validate billing period dates
+    if (!billingPeriodStart || !billingPeriodEnd) {
+      alert("Por favor, selecciona el período de facturación");
+      return;
+    }
+
+    setCreatingInvoice(true);
+
+    try {
+      // Plan configuration matching the toggle-subscription endpoint
+      const planConfigs: Record<string, { name: string; price: number; annualPrice: number }> = {
+        // test: { name: "Plan Test", price: 0.40, annualPrice: 0.40 }, // Commented out - can be enabled in the future
+        basico: { name: "Plan Básico", price: 149, annualPrice: 126.65 },
+        estandar: { name: "Plan Estándar", price: 249, annualPrice: 211.65 },
+        premium: { name: "Plan Premium", price: 649, annualPrice: 551.65 },
+      };
+
+      const selectedPlan = planConfigs[selectedPlanTier];
+      const amount = selectedBilling === "annual" ? selectedPlan.annualPrice : selectedPlan.price;
+
+      const response = await fetch("/api/admin/invoices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: clientId,
+          amount: amount,
+          planName: selectedPlan.name,
+          planTier: selectedPlanTier,
+          billingType: selectedBilling,
+          billingPeriodStart: new Date(billingPeriodStart).toISOString(),
+          billingPeriodEnd: new Date(billingPeriodEnd).toISOString(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al crear la factura");
+      }
+
+      alert("¡Factura creada exitosamente!");
+      setBillingPeriodStart("");
+      setBillingPeriodEnd("");
+
+      // Reload page to show new invoice
+      window.location.reload();
+    } catch (err: unknown) {
+      alert(`Error: ${err instanceof Error ? err.message : 'An error occurred'}`);
+    } finally {
+      setCreatingInvoice(false);
+    }
+  };
+
+  const handleMarkInvoiceAsPaid = async (invoiceId: string) => {
+    if (!confirm("¿Marcar esta factura como pagada?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/admin/invoices", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          invoiceId,
+          status: "paid",
+          paymentDate: new Date().toISOString(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al actualizar la factura");
+      }
+
+      alert("Factura marcada como pagada");
+      window.location.reload();
+    } catch (err: unknown) {
+      alert(`Error: ${err instanceof Error ? err.message : 'An error occurred'}`);
+    }
+  };
+
+  const handleDeleteInvoice = async (invoiceId: string) => {
+    if (!confirm("¿Estás seguro de eliminar esta factura? Esta acción no se puede deshacer.")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/invoices?invoiceId=${invoiceId}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al eliminar la factura");
+      }
+
+      alert("Factura eliminada exitosamente");
+      window.location.reload();
+    } catch (err: unknown) {
+      alert(`Error: ${err instanceof Error ? err.message : 'An error occurred'}`);
+    }
   };
 
   if (loading) {
@@ -292,14 +447,6 @@ export default function ManageClientPage() {
                 </div>
               </div>
             </div>
-
-            <button
-              onClick={handleSaveSettings}
-              disabled={saving}
-              className="px-6 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors"
-            >
-              {saving ? "Guardando..." : "Guardar Cambios"}
-            </button>
           </div>
         </div>
       </header>
@@ -343,17 +490,12 @@ export default function ManageClientPage() {
               >
                 Gestionar Dashboard
               </Link>
-              <Link
-                href={`/dashboard/admin/clients/${clientId}/preview`}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-colors"
-              >
-                Vista Previa
-              </Link>
+              
             </div>
           </div>
         </motion.div>
 
-        {/* Edit Profile Section */}
+        {/* Subscription Management Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -361,326 +503,438 @@ export default function ManageClientPage() {
           className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-8"
         >
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-            Editar Información del Cliente
+            Gestionar Suscripción
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Nombre Completo
-              </label>
-              <input
-                type="text"
-                value={editedName}
-                onChange={(e) => setEditedName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
-                placeholder="Nombre del cliente"
-              />
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Activa o desactiva manualmente la suscripción de este cliente.
+            </p>
+
+            {/* Plan Selector */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  htmlFor="planTier"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
+                  Seleccionar Plan
+                </label>
+                <select
+                  id="planTier"
+                  value={selectedPlanTier}
+                  onChange={(e) => setSelectedPlanTier(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                >
+                  {/* <option value="test">Plan Test</option> */}
+                  <option value="basico">Plan Básico</option>
+                  <option value="estandar">Plan Estándar</option>
+                  <option value="premium">Plan Premium</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="billingType"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
+                  Tipo de Facturación
+                </label>
+                <select
+                  id="billingType"
+                  value={selectedBilling}
+                  onChange={(e) => setSelectedBilling(e.target.value as "monthly" | "annual")}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                >
+                  <option value="monthly">Mensual</option>
+                  <option value="annual">Anual</option>
+                </select>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Correo Electrónico
-              </label>
-              <input
-                type="email"
-                value={editedEmail}
-                onChange={(e) => setEditedEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
-                placeholder="correo@ejemplo.com"
-              />
-            </div>
+            {/* Dynamic Activate/Deactivate/Update Buttons */}
+            {userPlan && userPlan.status === "active" ? (
+              <div className="grid grid-cols-2 gap-4">
+                {/* Update Plan Button */}
+                <button
+                  onClick={handleUpdatePlan}
+                  disabled={activatingSubscription}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  {activatingSubscription ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      Procesando...
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                      </svg>
+                      Actualizar Plan
+                    </>
+                  )}
+                </button>
+
+                {/* Deactivate Button */}
+                <button
+                  onClick={handleDeactivateSubscription}
+                  disabled={activatingSubscription}
+                  className="px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  {activatingSubscription ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      Procesando...
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                      Desactivar Suscripción
+                    </>
+                  )}
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleActivateSubscription}
+                disabled={activatingSubscription}
+                className="w-full px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                {activatingSubscription ? (
+                  <>
+                    <svg
+                      className="animate-spin h-5 w-5"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    Activar Suscripción
+                  </>
+                )}
+              </button>
+            )}
           </div>
-
-          <button
-            onClick={handleSaveProfile}
-            disabled={savingProfile}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors"
-          >
-            {savingProfile ? "Guardando..." : "Guardar Perfil"}
-          </button>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Dashboard Settings */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg"
-          >
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-              Configuración del Dashboard
-            </h3>
-
-            {/* Show Stats Toggle */}
-            <div className="mb-6">
-              <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-gray-700 dark:text-gray-300 font-medium">
-                  Mostrar Estadísticas
-                </span>
-                <input
-                  type="checkbox"
-                  checked={settings.dashboardSettings.showStats}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      dashboardSettings: {
-                        ...settings.dashboardSettings,
-                        showStats: e.target.checked,
-                      },
-                    })
-                  }
-                  className="w-5 h-5 text-red-600 rounded focus:ring-red-500"
-                />
-              </label>
-            </div>
-
-            {/* Enabled Stats */}
-            {settings.dashboardSettings.showStats && (
-              <div className="mb-6">
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                  Estadísticas Visibles:
-                </p>
-                <div className="space-y-2">
-                  {availableStats.map((stat) => (
-                    <label
-                      key={stat.id}
-                      className="flex items-center cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={settings.dashboardSettings.enabledStats.includes(
-                          stat.id
-                        )}
-                        onChange={() => toggleStat(stat.id)}
-                        className="w-4 h-4 text-red-600 rounded focus:ring-red-500 mr-3"
-                      />
-                      <span className="text-gray-700 dark:text-gray-300">
-                        {stat.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Show Activity Toggle */}
-            <div>
-              <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-gray-700 dark:text-gray-300 font-medium">
-                  Mostrar Actividad Reciente
-                </span>
-                <input
-                  type="checkbox"
-                  checked={settings.dashboardSettings.showActivity}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      dashboardSettings: {
-                        ...settings.dashboardSettings,
-                        showActivity: e.target.checked,
-                      },
-                    })
-                  }
-                  className="w-5 h-5 text-red-600 rounded focus:ring-red-500"
-                />
-              </label>
-            </div>
-          </motion.div>
-
-          {/* Media Settings */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg"
-          >
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-              Configuración de Contenido
-            </h3>
-
-            {/* Allow Upload Toggle */}
-            <div className="mb-6">
-              <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-gray-700 dark:text-gray-300 font-medium">
-                  Permitir Subir Archivos
-                </span>
-                <input
-                  type="checkbox"
-                  checked={settings.mediaSettings.allowUpload}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      mediaSettings: {
-                        ...settings.mediaSettings,
-                        allowUpload: e.target.checked,
-                      },
-                    })
-                  }
-                  className="w-5 h-5 text-red-600 rounded focus:ring-red-500"
-                />
-              </label>
-            </div>
-
-            {settings.mediaSettings.allowUpload && (
-              <>
-                {/* Max File Size */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Tamaño Máximo de Archivo (MB)
-                  </label>
-                  <input
-                    type="number"
-                    value={settings.mediaSettings.maxFileSize}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        mediaSettings: {
-                          ...settings.mediaSettings,
-                          maxFileSize: Number(e.target.value),
-                        },
-                      })
-                    }
-                    min="1"
-                    max="100"
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white"
-                  />
-                </div>
-
-                {/* Allowed Types */}
-                <div className="mb-6">
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Tipos de Archivo Permitidos:
-                  </p>
-                  <div className="space-y-2">
-                    <label className="flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={settings.mediaSettings.allowedTypes.includes(
-                          "image"
-                        )}
-                        onChange={() => toggleMediaType("image")}
-                        className="w-4 h-4 text-red-600 rounded focus:ring-red-500 mr-3"
-                      />
-                      <span className="text-gray-700 dark:text-gray-300">
-                        Imágenes (JPG, PNG, GIF)
-                      </span>
-                    </label>
-                    <label className="flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={settings.mediaSettings.allowedTypes.includes(
-                          "video"
-                        )}
-                        onChange={() => toggleMediaType("video")}
-                        className="w-4 h-4 text-red-600 rounded focus:ring-red-500 mr-3"
-                      />
-                      <span className="text-gray-700 dark:text-gray-300">
-                        Videos (MP4, MOV)
-                      </span>
-                    </label>
-                  </div>
-                </div>
-              </>
-            )}
-          </motion.div>
-
-          {/* Profile Settings */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg"
-          >
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-              Configuración del Perfil
-            </h3>
-
-            {/* Show Plan Details */}
-            <div className="mb-6">
-              <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-gray-700 dark:text-gray-300 font-medium">
-                  Mostrar Detalles del Plan
-                </span>
-                <input
-                  type="checkbox"
-                  checked={settings.profileSettings.showPlanDetails}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      profileSettings: {
-                        ...settings.profileSettings,
-                        showPlanDetails: e.target.checked,
-                      },
-                    })
-                  }
-                  className="w-5 h-5 text-red-600 rounded focus:ring-red-500"
-                />
-              </label>
-            </div>
-
-            {/* Allow Plan Change */}
-            <div className="mb-6">
-              <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-gray-700 dark:text-gray-300 font-medium">
-                  Permitir Cambio de Plan
-                </span>
-                <input
-                  type="checkbox"
-                  checked={settings.profileSettings.allowPlanChange}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      profileSettings: {
-                        ...settings.profileSettings,
-                        allowPlanChange: e.target.checked,
-                      },
-                    })
-                  }
-                  className="w-5 h-5 text-red-600 rounded focus:ring-red-500"
-                />
-              </label>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Custom Message Section - Full Width */}
+        {/* Invoices / Billing Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mt-8"
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-8"
         >
-          <div className="mb-4">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-              Mensaje Personalizado para el Cliente
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Este mensaje aparecerá en una sección separada en el dashboard del
-              cliente.
-            </p>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            Facturas / Billing
+          </h3>
+
+          {/* Invoice Creation Form */}
+          <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+              Generar Nueva Factura
+            </h4>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              {/* Billing Period Start */}
+              <div>
+                <label
+                  htmlFor="billingStart"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
+                  Inicio del Período
+                </label>
+                <input
+                  type="date"
+                  id="billingStart"
+                  value={billingPeriodStart}
+                  onChange={(e) => setBillingPeriodStart(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Billing Period End */}
+              <div>
+                <label
+                  htmlFor="billingEnd"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
+                  Fin del Período
+                </label>
+                <input
+                  type="date"
+                  id="billingEnd"
+                  value={billingPeriodEnd}
+                  onChange={(e) => setBillingPeriodEnd(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            {/* Display selected plan info */}
+            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <p className="text-sm text-blue-800 dark:text-blue-300">
+                <span className="font-semibold">Plan seleccionado:</span>{" "}
+                {/* {selectedPlanTier === "test" && "Plan Test"} */}
+                {selectedPlanTier === "basico" && "Plan Básico"}
+                {selectedPlanTier === "estandar" && "Plan Estándar"}
+                {selectedPlanTier === "premium" && "Plan Premium"}
+                {" · "}
+                <span className="font-semibold">
+                  $
+                  {selectedBilling === "annual"
+                    ? /* selectedPlanTier === "test" ? "0.40" : */
+                      selectedPlanTier === "basico" ? "126.65" :
+                      selectedPlanTier === "estandar" ? "211.65" : "551.65"
+                    : /* selectedPlanTier === "test" ? "0.40" : */
+                      selectedPlanTier === "basico" ? "149" :
+                      selectedPlanTier === "estandar" ? "249" : "649"
+                  }
+                </span>
+                {" "}USD ({selectedBilling === "monthly" ? "Mensual" : "Anual"})
+              </p>
+            </div>
+
+            <button
+              onClick={handleCreateInvoice}
+              disabled={creatingInvoice}
+              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              {creatingInvoice ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Creando...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Generar Factura
+                </>
+              )}
+            </button>
           </div>
 
-          <textarea
-            value={settings.dashboardSettings.customMessage || ""}
-            onChange={(e) =>
-              setSettings({
-                ...settings,
-                dashboardSettings: {
-                  ...settings.dashboardSettings,
-                  customMessage: e.target.value,
-                },
-              })
-            }
-            rows={6}
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
-            placeholder="Escribe un mensaje personalizado para tu cliente..."
-          />
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            Los saltos de línea y espacios se respetarán en el mensaje del
-            cliente.
-          </p>
+          {/* Invoice List Header */}
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+            Facturas Existentes
+          </h4>
+
+          {invoices.length === 0 ? (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              No hay facturas generadas aún
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {invoices.map((invoice) => (
+                <div
+                  key={invoice.id}
+                  className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-sm font-medium text-gray-900 dark:text-white">
+                        {invoice.invoice_number}
+                      </span>
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        invoice.status === 'paid' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                        invoice.status === 'overdue' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
+                        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                      }`}>
+                        {invoice.status}
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {invoice.plan_name} · ${invoice.amount} {invoice.currency}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Fecha: {invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('es-ES') : 'N/A'} ·
+                      Vence: {new Date(invoice.due_date).toLocaleDateString('es-ES')}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {invoice.status === 'pending' && (
+                      <button
+                        onClick={() => handleMarkInvoiceAsPaid(invoice.id)}
+                        className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded transition-colors"
+                      >
+                        Marcar como Pagada
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleDeleteInvoice(invoice.id)}
+                      className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition-colors"
+                      title="Eliminar factura"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </motion.div>
+
+        {/* Uploaded Files Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-8"
+        >
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            Archivos Subidos por el Cliente
+          </h3>
+
+          {uploadedFiles.length === 0 ? (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              El cliente no ha subido archivos aún
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {uploadedFiles.map((file) => (
+                <div
+                  key={file.id}
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {file.file_name}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {file.file_type} · {file.file_size ? (file.file_size / 1024 / 1024).toFixed(2) : '0'} MB
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {file.created_at ? new Date(file.created_at).toLocaleDateString('es-ES') : 'N/A'}
+                      </p>
+                    </div>
+                    {file.file_type?.startsWith('image/') && file.public_url && (
+                      <div className="relative w-12 h-12 ml-2 flex-shrink-0">
+                        <Image
+                          src={file.public_url}
+                          alt={file.file_name || 'File'}
+                          fill
+                          className="object-cover rounded"
+                          unoptimized
+                        />
+                      </div>
+                    )}
+                  </div>
+                  {file.public_url && (
+                    <a
+                      href={file.public_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      Ver archivo
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </motion.div>
       </main>
     </div>

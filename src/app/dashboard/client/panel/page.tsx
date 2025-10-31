@@ -7,10 +7,34 @@ import { createClient } from "@/lib/supabase/client";
 import { ClientDashboard } from "@/types/dashboard";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+interface UserPlan {
+  planName: string;
+  planTier: string;
+  billingType: string;
+  price: number;
+  status: string;
+  subscriptionEnd: string;
+}
+
+interface Invoice {
+  id: string;
+  invoice_number: string;
+  invoice_date: string;
+  due_date: string;
+  amount: number;
+  currency: string;
+  status: string;
+  plan_name: string;
+  billing_period_start: string;
+  billing_period_end: string;
+}
+
 export default function ClientPanel() {
   const [loading, setLoading] = useState(true);
   const [dashboard, setDashboard] = useState<ClientDashboard | null>(null);
   const [hasActivePlan, setHasActivePlan] = useState(false);
+  const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const router = useRouter();
   const supabase = createClient();
 
@@ -30,6 +54,7 @@ export default function ClientPanel() {
 
         if (planData.subscription && planData.subscription.status === 'active') {
           setHasActivePlan(true);
+          setUserPlan(planData.subscription);
         }
 
         // Fetch dashboard data
@@ -38,6 +63,14 @@ export default function ClientPanel() {
 
         if (data.dashboards && data.dashboards.length > 0) {
           setDashboard(data.dashboards[0]);
+        }
+
+        // Fetch invoices
+        const invoicesResponse = await fetch(`/api/admin/invoices?userId=${user.id}`);
+        const invoicesData = await invoicesResponse.json();
+
+        if (invoicesData.invoices) {
+          setInvoices(invoicesData.invoices);
         }
       } catch (error) {
         console.error('Error fetching dashboard:', error);
@@ -137,17 +170,41 @@ export default function ClientPanel() {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            Resumen General
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            {dashboard.report_period}
-          </p>
-          {dashboard.description && (
-            <p className="text-gray-500 dark:text-gray-400 mt-2">
-              {dashboard.description}
-            </p>
-          )}
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                Resumen General
+              </h1>
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                {dashboard.report_period}
+              </p>
+              {dashboard.description && (
+                <p className="text-gray-500 dark:text-gray-400 mt-2">
+                  {dashboard.description}
+                </p>
+              )}
+            </div>
+
+            {/* Plan Info Badge */}
+            {userPlan && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl px-6 py-4 shadow-sm">
+                <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                  Plan Activo
+                </div>
+                <div className="text-xl font-bold text-red-600 dark:text-red-500">
+                  {userPlan.planName}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  ${userPlan.price} USD / {userPlan.billingType === 'monthly' ? 'mes' : 'año'}
+                </div>
+                {userPlan.subscriptionEnd && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    Vence: {new Date(userPlan.subscriptionEnd).toLocaleDateString('es-ES')}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </motion.div>
 
         {/* Metrics Grid */}
@@ -232,7 +289,7 @@ export default function ClientPanel() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-gray-800 dark:to-gray-800 rounded-xl p-8 shadow-sm border-l-4 border-red-600"
+            className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-gray-800 dark:to-gray-800 rounded-xl p-8 shadow-sm border-l-4 border-red-600 mb-8"
           >
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0">
@@ -248,6 +305,70 @@ export default function ClientPanel() {
                   {dashboard.recommendation}
                 </p>
               </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Invoice History Section */}
+        {invoices.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-sm"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <svg className="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Historial de Facturación
+              </h3>
+            </div>
+
+            <div className="space-y-3">
+              {invoices.map((invoice) => (
+                <div
+                  key={invoice.id}
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+                >
+                  <div className="flex-1 mb-3 sm:mb-0">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="font-mono text-sm font-semibold text-gray-900 dark:text-white">
+                        {invoice.invoice_number}
+                      </span>
+                      <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
+                        invoice.status === 'paid'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                          : invoice.status === 'overdue'
+                          ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                      }`}>
+                        {invoice.status === 'paid' ? 'Pagada' : invoice.status === 'overdue' ? 'Vencida' : 'Pendiente'}
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      {invoice.plan_name}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Período: {new Date(invoice.billing_period_start).toLocaleDateString('es-ES')} - {new Date(invoice.billing_period_end).toLocaleDateString('es-ES')}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Vence: {new Date(invoice.due_date).toLocaleDateString('es-ES')}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between sm:justify-end gap-4">
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                        ${invoice.amount}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {invoice.currency}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </motion.div>
         )}

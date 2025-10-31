@@ -33,36 +33,94 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
     }
 
-    // Fetch all user plans (bypasses RLS because we're using service role)
-    const { data: userPlans, error: fetchError } = await supabaseAdmin
-      .from('user_plans')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Check if requesting a specific user by ID
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('id');
 
-    if (fetchError) {
-      console.error('Error fetching user plans:', fetchError);
+    // If userId is provided, fetch single user
+    if (userId) {
+      const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId);
+
+      if (userError || !userData.user) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+
+      // Fetch user plan
+      const { data: userPlan } = await supabaseAdmin
+        .from('user_plans')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      const singleUserData = {
+        id: userData.user.id,
+        email: userData.user.email || 'Unknown',
+        full_name: userData.user.user_metadata?.full_name || null,
+        created_at: userData.user.created_at,
+        last_sign_in_at: userData.user.last_sign_in_at,
+        plan_name: userPlan?.plan_name || null,
+        plan_tier: userPlan?.plan_tier || null,
+        status: userPlan?.status || 'no_plan',
+        price: userPlan?.price || null,
+        billing_type: userPlan?.billing_type || null,
+        subscription_start: userPlan?.subscription_start || null,
+        subscription_end: userPlan?.subscription_end || null,
+      };
+
+      return NextResponse.json({ user: singleUserData });
+    }
+
+    // Otherwise, fetch all users (existing logic)
+    // Fetch all registered users from auth.users
+    const { data: authData, error: authFetchError } = await supabaseAdmin.auth.admin.listUsers();
+
+    if (authFetchError) {
+      console.error('Error fetching users:', authFetchError);
       return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
 
-    // Fetch user details for each plan
-    const usersData = await Promise.all(
-      userPlans.map(async (plan) => {
-        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(plan.user_id);
+    // Filter out admin users
+    const nonAdminUsers = authData.users.filter(u => {
+      const userEmail = u.email?.toLowerCase() || '';
+      return !ADMIN_EMAILS.some(email => email.toLowerCase() === userEmail);
+    });
 
-        return {
-          id: plan.user_id,
-          email: authUser?.user?.email || 'Unknown',
-          plan_name: plan.plan_name,
-          plan_tier: plan.plan_tier,
-          status: plan.status,
-          price: plan.price,
-          billing_type: plan.billing_type,
-          subscription_start: plan.subscription_start,
-          subscription_end: plan.subscription_end,
-          created_at: plan.created_at,
-        };
-      })
-    );
+    // Fetch all user plans
+    const { data: userPlans } = await supabaseAdmin
+      .from('user_plans')
+      .select('*');
+
+    // Create a map of user_id to plan data for quick lookup
+    const plansByUserId = new Map();
+    if (userPlans) {
+      userPlans.forEach(plan => {
+        plansByUserId.set(plan.user_id, plan);
+      });
+    }
+
+    // Combine user data with plan data
+    const usersData = nonAdminUsers.map(user => {
+      const plan = plansByUserId.get(user.id);
+
+      return {
+        id: user.id,
+        email: user.email || 'Unknown',
+        full_name: user.user_metadata?.full_name || null,
+        created_at: user.created_at,
+        last_sign_in_at: user.last_sign_in_at,
+        // Plan data (if exists)
+        plan_name: plan?.plan_name || null,
+        plan_tier: plan?.plan_tier || null,
+        status: plan?.status || 'no_plan',
+        price: plan?.price || null,
+        billing_type: plan?.billing_type || null,
+        subscription_start: plan?.subscription_start || null,
+        subscription_end: plan?.subscription_end || null,
+      };
+    });
+
+    // Sort by creation date (newest first)
+    usersData.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
     return NextResponse.json({ users: usersData });
   } catch (error) {

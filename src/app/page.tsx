@@ -31,7 +31,7 @@ export default function Home() {
               transition={{ duration: 0.8 }}
               className="mb-8"
             >
-              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold drop-shadow-2xl mb-2">
+              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold drop-shadow-2xl mb-2 notranslate">
                 <span className="text-red-500">Red</span>
                 <span className="text-white">Onion</span>
               </h1>
@@ -492,353 +492,462 @@ export default function Home() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Starter Plan */}
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              whileHover={{ y: -10 }}
-              className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 border-2 border-gray-200 dark:border-gray-700 hover:border-red-600 dark:hover:border-red-500 transition-colors duration-300"
-            >
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Inicial
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Perfecto para empresas en crecimiento
+          {/* Plan Básico */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            whileHover={{ y: -10 }}
+            className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 border-2 border-gray-200 dark:border-gray-700 hover:border-red-600 dark:hover:border-red-500 transition-colors duration-300"
+          >
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              Plan Básico
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-2 font-semibold">
+              Fundación Digital
+            </p>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm">
+              Ideal para emprendedores o negocios locales que necesitan una presencia profesional online.
+            </p>
+            <div className="mb-6">
+              <span className="text-5xl font-bold text-gray-900 dark:text-white">
+                $149
+              </span>
+              <span className="text-gray-600 dark:text-gray-400">/mes</span>
+              <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+                $126.65/mes con pago anual
               </p>
-              <div className="mb-6">
-                <span className="text-5xl font-bold text-gray-900 dark:text-white">
-                  $2,500
+            </div>
+            <ul className="space-y-4 mb-8">
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Sitio web personalizado (5 secciones)
                 </span>
-                <span className="text-gray-600 dark:text-gray-400">/mes</span>
-              </div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-start">
-                  <svg
-                    className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Hasta 3 canales de marketing
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <svg
-                    className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Sesiones de estrategia mensuales
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <svg
-                    className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Análisis e informes básicos
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <svg
-                    className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Soporte por correo electrónico
-                  </span>
-                </li>
-              </ul>
-              <a
-                href="#contacto"
-                className="block w-full py-3 px-6 text-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold rounded-lg transition-colors duration-200"
-              >
-                Comenzar
-              </a>
-            </motion.div>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Optimización móvil y carga rápida
+                </span>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Google Maps y formularios de contacto
+                </span>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Portal básico con métricas
+                </span>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Soporte por WhatsApp o email
+                </span>
+              </li>
+              <li className="flex items-start text-red-600 dark:text-red-400 font-medium">
+                <span className="text-sm mr-1">+</span>
+                <span className="text-sm">
+                  SEO optimizado (+ $20)
+                </span>
+              </li>
+            </ul>
+            <a
+              href="#contacto"
+              className="block w-full py-3 px-6 text-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold rounded-lg transition-colors duration-200"
+            >
+              Comenzar
+            </a>
+          </motion.div>
 
-            {/* Professional Plan - Featured */}
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              whileHover={{ y: -10, scale: 1.02 }}
-              className="bg-red-50 dark:bg-red-900/20 rounded-2xl p-8 border-2 border-red-600 dark:border-red-500 relative transform md:scale-105 shadow-xl"
-            >
-              <div className="absolute top-0 right-0 bg-red-600 dark:bg-red-500 text-white px-4 py-1 rounded-bl-lg rounded-tr-lg text-sm font-semibold">
-                POPULAR
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Profesional
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Para empresas establecidas
+          {/* Plan Estándar - Featured */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            whileHover={{ y: -10, scale: 1.02 }}
+            className="bg-red-50 dark:bg-red-900/20 rounded-2xl p-8 border-2 border-red-600 dark:border-red-500 relative transform md:scale-105 shadow-xl"
+          >
+            <div className="absolute top-0 right-0 bg-red-600 dark:bg-red-500 text-white px-4 py-1 rounded-bl-lg rounded-tr-lg text-sm font-semibold">
+              POPULAR
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              Plan Estándar
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-2 font-semibold">
+              Crecimiento y Posicionamiento
+            </p>
+            <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm">
+              Diseñado para pymes y negocios en expansión que buscan más visibilidad, tráfico y ventas.
+            </p>
+            <div className="mb-6">
+              <span className="text-5xl font-bold text-gray-900 dark:text-white">
+                $249
+              </span>
+              <span className="text-gray-600 dark:text-gray-300">/mes</span>
+              <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+                $211.65/mes con pago anual
               </p>
-              <div className="mb-6">
-                <span className="text-5xl font-bold text-gray-900 dark:text-white">
-                  $5,000
+            </div>
+            <ul className="space-y-4 mb-8">
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-300">
+                  Todo lo del Plan Básico
                 </span>
-                <span className="text-gray-600 dark:text-gray-300">/mes</span>
-              </div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-start">
-                  <svg
-                    className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Hasta 8 canales de marketing
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <svg
-                    className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Sesiones de estrategia quincenales
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <svg
-                    className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Análisis avanzados e insights
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <svg
-                    className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Gerente de cuenta dedicado
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <svg
-                    className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Soporte prioritario
-                  </span>
-                </li>
-              </ul>
-              <a
-                href="#contacto"
-                className="block w-full py-3 px-6 text-center bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white font-semibold rounded-lg transition-colors duration-200 shadow-lg"
-              >
-                Comenzar
-              </a>
-            </motion.div>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-300">
+                  Gestión de 2 redes sociales
+                </span>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-300">
+                  Contenido cada dos días
+                </span>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-300">
+                  SEO general y análisis mensual
+                </span>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-300">
+                  Acceso al portal con métricas
+                </span>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-300">
+                  Soporte premium
+                </span>
+              </li>
+              <li className="flex items-start text-red-600 dark:text-red-400 font-medium">
+                <span className="text-sm mr-1">+</span>
+                <span className="text-sm">
+                  Maximizador de tráfico pago (+ $50)
+                </span>
+              </li>
+            </ul>
+            <a
+              href="#contacto"
+              className="block w-full py-3 px-6 text-center bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white font-semibold rounded-lg transition-colors duration-200 shadow-lg"
+            >
+              Comenzar
+            </a>
+          </motion.div>
 
-            {/* Enterprise Plan */}
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              whileHover={{ y: -10 }}
-              className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 border-2 border-gray-200 dark:border-gray-700 hover:border-red-600 dark:hover:border-red-500 transition-colors duration-300"
-            >
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Empresarial
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Para grandes organizaciones
+          {/* Plan Premium */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            whileHover={{ y: -10 }}
+            className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 border-2 border-gray-200 dark:border-gray-700 hover:border-red-600 dark:hover:border-red-500 transition-colors duration-300"
+          >
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              Plan Premium
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-2 font-semibold">
+              Automatización y Crecimiento Inteligente
+            </p>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm">
+              Ideal para marcas consolidadas que buscan automatizar, escalar y destacarse.
+            </p>
+            <div className="mb-6">
+              <span className="text-5xl font-bold text-gray-900 dark:text-white">
+                $649
+              </span>
+              <span className="text-gray-600 dark:text-gray-400">/mes</span>
+              <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+                $551.65/mes con pago anual
               </p>
-              <div className="mb-6">
-                <span className="text-5xl font-bold text-gray-900 dark:text-white">
-                  Personalizado
+            </div>
+            <ul className="space-y-4 mb-8">
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Todo lo del Plan Estándar
                 </span>
-              </div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-start">
-                  <svg
-                    className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Canales de marketing ilimitados
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <svg
-                    className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Sesiones de estrategia semanales
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <svg
-                    className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Informes y dashboards personalizados
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <svg
-                    className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Equipo dedicado
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <svg
-                    className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Soporte premium 24/7
-                  </span>
-                </li>
-              </ul>
-              <a
-                href="#contacto"
-                className="block w-full py-3 px-6 text-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold rounded-lg transition-colors duration-200"
-              >
-                Contactar Ventas
-              </a>
-            </motion.div>
-          </div>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Gestión de 3+ redes sociales
+                </span>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Publicaciones diarias estratégicas
+                </span>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Campañas publicitarias activas
+                </span>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Chatbot con IA integrado
+                </span>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Email marketing automatizado
+                </span>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  className="w-6 h-6 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Reuniones estratégicas semanales
+                </span>
+              </li>
+              <li className="flex items-start text-red-600 dark:text-red-400 font-medium">
+                <span className="text-sm mr-1">+</span>
+                <span className="text-sm">
+                  Publicidad con influencers (+ $250)
+                </span>
+              </li>
+            </ul>
+            <a
+              href="#contacto"
+              className="block w-full py-3 px-6 text-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold rounded-lg transition-colors duration-200"
+            >
+              Comenzar
+            </a>
+          </motion.div>
+        </div>
         </div>
       </section>
 

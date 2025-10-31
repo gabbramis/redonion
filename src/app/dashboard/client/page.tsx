@@ -36,24 +36,25 @@ interface CartItem {
 initMercadoPago(process.env.NEXT_PUBLIC_MP_PUBLIC_KEY!);
 
 const plans: Plan[] = [
-  {
-    id: "test",
-    name: "Plan Test",
-    subtitle: "Solo para Pruebas",
-    description:
-      "Plan de prueba de ~16 UYU para verificar que todo funciona correctamente.",
-    features: [
-      "Este es un plan de prueba",
-      "Solo para verificar el flujo de pago",
-      "Cuesta aproximadamente 16 pesos uruguayos (mínimo de MercadoPago)",
-    ],
-    price: 0.40, // ~16 UYU - slightly above minimum to account for exchange rate fluctuations
-    annualPrice: 0.40,
-    upgrade: {
-      name: "Extra de prueba",
-      price: 0.40,
-    },
-  },
+  // Commented out - can be enabled in the future
+  // {
+  //   id: "test",
+  //   name: "Plan Test",
+  //   subtitle: "Solo para Pruebas",
+  //   description:
+  //     "Plan de prueba de ~16 UYU para verificar que todo funciona correctamente.",
+  //   features: [
+  //     "Este es un plan de prueba",
+  //     "Solo para verificar el flujo de pago",
+  //     "Cuesta aproximadamente 16 pesos uruguayos (mínimo de MercadoPago)",
+  //   ],
+  //   price: 0.40, // ~16 UYU - slightly above minimum to account for exchange rate fluctuations
+  //   annualPrice: 0.40,
+  //   upgrade: {
+  //     name: "Extra de prueba",
+  //     price: 0.40,
+  //   },
+  // },
   {
     id: "basico",
     name: "Plan Básico",
