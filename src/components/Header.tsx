@@ -1,36 +1,30 @@
 "use client";
 
-// Removed 'Image' import since we are using standard <img> for flags
+import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-
-// NOTE: We keep the Next.js Image component for the logo
-import NextImage from "next/image"; 
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState("es");
   const [googleTranslateReady, setGoogleTranslateReady] = useState(false);
 
-  /**
-   * Effect to monitor the DOM until the Google Translate select element is loaded.
-   */
   useEffect(() => {
     let mounted = true;
     let checkAttempts = 0;
-    const maxAttempts = 60; 
+    const maxAttempts = 40; // Try for up to 20 seconds (40 * 500ms)
 
     const waitForGoogleTranslate = () => {
       if (!mounted) return;
 
       checkAttempts++;
-      // *** FRAGILE POINT: Querying the hidden Google Translate select box ***
       const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
 
       if (select) {
         console.log('✅ Google Translate widget found!');
         setGoogleTranslateReady(true);
 
+        // Check current language
         const currentValue = select.value;
         if (currentValue === 'pt') {
           setCurrentLang('pt');
@@ -38,13 +32,15 @@ export default function Header() {
           setCurrentLang('es');
         }
       } else if (checkAttempts < maxAttempts) {
+        // Keep checking
         setTimeout(waitForGoogleTranslate, 500);
       } else {
-        console.error('❌ Google Translate failed to load after the maximum attempts');
+        console.error('❌ Google Translate failed to load after 20 seconds');
       }
     };
 
-    const initialDelay = setTimeout(waitForGoogleTranslate, 1500);
+    // Start checking after a brief delay
+    const initialDelay = setTimeout(waitForGoogleTranslate, 1000);
 
     return () => {
       mounted = false;
@@ -52,9 +48,6 @@ export default function Header() {
     };
   }, []);
 
-  /**
-   * Toggles the language.
-   */
   const toggleLanguage = () => {
     if (!googleTranslateReady) {
       console.warn('⏳ Google Translate is still loading, please wait...');
@@ -65,21 +58,19 @@ export default function Header() {
     const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
 
     if (select) {
+      // Set the value
       select.value = targetLang;
 
-      // Dispatch change event to force the translation
-      try {
-        const event = new Event('change', { bubbles: true });
-        select.dispatchEvent(event);
-      } catch (error) {
-         // @ts-ignore: Fallback for older/different environments
-         select.fireEvent('onchange'); 
-      }
+      // Dispatch change event
+      const event = new Event('change', { bubbles: true });
+      select.dispatchEvent(event);
 
+      // Update local state
       setCurrentLang(targetLang);
+
       console.log(`✅ Language toggled to: ${targetLang}`);
     } else {
-      console.error('❌ Google Translate widget not found during toggle attempt.');
+      console.error('❌ Google Translate widget not found');
     }
   };
 
@@ -91,7 +82,7 @@ export default function Header() {
           <div className="flex-shrink-0">
             <Link href="/login" className="flex items-center gap-3 group">
               <div className="transition-transform duration-300 group-hover:scale-110">
-                <NextImage // Used NextImage for the logo
+                <Image
                   src="/onion-logo.png"
                   alt="RedOnion Logo"
                   width={40}
@@ -107,14 +98,32 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {/* ... other links ... */}
-            <a href="#servicios" className="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 transition-colors font-medium">Servicios</a>
-            <a href="#proceso" className="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 transition-colors font-medium">Proceso</a>
-            <a href="#precios" className="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 transition-colors font-medium">Precios</a>
-            <a href="#testimonios" className="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 transition-colors font-medium">Testimonios</a>
+            <a
+              href="#servicios"
+              className="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 transition-colors font-medium"
+            >
+              Servicios
+            </a>
+            <a
+              href="#proceso"
+              className="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 transition-colors font-medium"
+            >
+              Proceso
+            </a>
+            <a
+              href="#precios"
+              className="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 transition-colors font-medium"
+            >
+              Precios
+            </a>
+            <a
+              href="#testimonios"
+              className="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 transition-colors font-medium"
+            >
+              Testimonios
+            </a>
 
-
-            {/* Language Toggle Flag - FIXED: Using standard <img> */}
+            {/* Language Toggle Flag */}
             <button
               onClick={toggleLanguage}
               className={`hover:scale-110 transition-all duration-200 flex items-center gap-2 ${
@@ -130,7 +139,7 @@ export default function Header() {
               }
               disabled={!googleTranslateReady}
             >
-              <img
+              <Image
                 src={currentLang === 'es' ? '/flag-br.svg' : '/flag-es.svg'}
                 alt={currentLang === 'es' ? 'Cambiar a Português' : 'Mudar para Español'}
                 width={24}
@@ -149,7 +158,7 @@ export default function Header() {
 
           {/* Mobile Menu Button & Language Toggle */}
           <div className="md:hidden flex items-center gap-3">
-            {/* Language Toggle Flag (Mobile) - FIXED: Using standard <img> */}
+            {/* Language Toggle Flag */}
             <button
               onClick={toggleLanguage}
               className={`hover:scale-110 transition-all duration-200 flex items-center gap-2 ${
@@ -165,7 +174,7 @@ export default function Header() {
               }
               disabled={!googleTranslateReady}
             >
-              <img
+              <Image
                 src={currentLang === 'es' ? '/flag-br.svg' : '/flag-es.svg'}
                 alt={currentLang === 'es' ? 'Cambiar a Português' : 'Mudar para Español'}
                 width={24}
@@ -202,12 +211,41 @@ export default function Header() {
           }`}
         >
           <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-            {/* ... mobile links ... */}
-            <a href="#servicios" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Servicios</a>
-            <a href="#proceso" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Proceso</a>
-            <a href="#precios" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Precios</a>
-            <a href="#testimonios" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Testimonios</a>
-            <a href="#contacto" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 mx-3 mt-2 text-center bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors duration-200">Contacto</a>
+            <a
+              href="#servicios"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              Servicios
+            </a>
+            <a
+              href="#proceso"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              Proceso
+            </a>
+            <a
+              href="#precios"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              Precios
+            </a>
+            <a
+              href="#testimonios"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              Testimonios
+            </a>
+            <a
+              href="#contacto"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 mx-3 mt-2 text-center bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors duration-200"
+            >
+              Contacto
+            </a>
           </div>
         </div>
       </nav>
