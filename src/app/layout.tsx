@@ -28,14 +28,6 @@ export default function RootLayout({
       <head>
         <style dangerouslySetInnerHTML={{
           __html: `
-            /* Hide Google Translate widget completely */
-            #google_translate_element {
-              display: none !important;
-            }
-            .goog-te-gadget {
-              display: none !important;
-            }
-            /* Hide Google Translate banner at top */
             .goog-te-banner-frame {
               display: none !important;
             }
@@ -48,42 +40,27 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* Hidden Google Translate element - required for translation to work */}
-        <div id="google_translate_element"></div>
         {children}
 
-        {/* Google Translate Scripts */}
+        <Script
+          id="google-translate-loader"
+          src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+          strategy="lazyOnload"
+        />
         <Script
           id="google-translate-init"
-          strategy="beforeInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               window.googleTranslateElementInit = function() {
-                try {
-                  if (typeof google !== 'undefined' && google.translate && google.translate.TranslateElement) {
-                    new google.translate.TranslateElement({
-                      pageLanguage: 'es',
-                      includedLanguages: 'es,pt',
-                      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-                      autoDisplay: false
-                    }, 'google_translate_element');
-                    console.log('✅ Google Translate initialized successfully');
-                    window.googleTranslateReady = true;
-                  } else {
-                    console.warn('⚠️ Google Translate API not ready yet, retrying...');
-                    setTimeout(window.googleTranslateElementInit, 500);
-                  }
-                } catch (error) {
-                  console.error('❌ Error initializing Google Translate:', error);
-                }
+                new google.translate.TranslateElement({
+                  pageLanguage: 'es',
+                  includedLanguages: 'es,pt',
+                  layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+                }, 'google_translate_element_desktop');
               };
             `
           }}
-        />
-        <Script
-          id="google-translate-script"
-          src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-          strategy="afterInteractive"
         />
       </body>
     </html>

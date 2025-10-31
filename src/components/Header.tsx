@@ -2,83 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState("es");
-  const [googleTranslateReady, setGoogleTranslateReady] = useState(false);
-
-  useEffect(() => {
-    let mounted = true;
-    let checkAttempts = 0;
-    const maxAttempts = 40; // Try for up to 20 seconds (40 * 500ms)
-
-    const waitForGoogleTranslate = () => {
-      if (!mounted) return;
-
-      checkAttempts++;
-      const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-
-      if (select) {
-        console.log('✅ Google Translate widget found!');
-        setGoogleTranslateReady(true);
-
-        // Check current language
-        const currentValue = select.value;
-        if (currentValue === 'pt') {
-          setCurrentLang('pt');
-        } else {
-          setCurrentLang('es');
-        }
-      } else if (checkAttempts < maxAttempts) {
-        // Keep checking
-        setTimeout(waitForGoogleTranslate, 500);
-      } else {
-        console.error('❌ Google Translate failed to load after 20 seconds');
-      }
-    };
-
-    // Start checking after a brief delay
-    const initialDelay = setTimeout(waitForGoogleTranslate, 1000);
-
-    return () => {
-      mounted = false;
-      clearTimeout(initialDelay);
-    };
-  }, []);
-
-  const toggleLanguage = () => {
-    if (!googleTranslateReady) {
-      console.warn('⏳ Google Translate is still loading, please wait...');
-      return;
-    }
-
-    const targetLang = currentLang === 'es' ? 'pt' : 'es';
-    const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-
-    if (select) {
-      // Set the value
-      select.value = targetLang;
-
-      // Dispatch change event
-      const event = new Event('change', { bubbles: true });
-      select.dispatchEvent(event);
-
-      // Update local state
-      setCurrentLang(targetLang);
-
-      console.log(`✅ Language toggled to: ${targetLang}`);
-    } else {
-      console.error('❌ Google Translate widget not found');
-    }
-  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-md">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/login" className="flex items-center gap-3 group">
               <div className="transition-transform duration-300 group-hover:scale-110">
@@ -96,7 +28,6 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             <a
               href="#servicios"
@@ -122,31 +53,9 @@ export default function Header() {
             >
               Testimonios
             </a>
-
-            {/* Language Toggle Flag */}
-            <button
-              onClick={toggleLanguage}
-              className={`hover:scale-110 transition-all duration-200 flex items-center gap-2 ${
-                !googleTranslateReady ? 'opacity-50 cursor-wait' : 'opacity-100'
-              }`}
-              aria-label="Toggle language"
-              title={
-                !googleTranslateReady
-                  ? 'Loading translator...'
-                  : currentLang === 'es'
-                    ? 'Cambiar a Português'
-                    : 'Mudar para Español'
-              }
-              disabled={!googleTranslateReady}
-            >
-              <Image
-                src={currentLang === 'es' ? '/flag-br.svg' : '/flag-es.svg'}
-                alt={currentLang === 'es' ? 'Cambiar a Português' : 'Mudar para Español'}
-                width={24}
-                height={24}
-                className="rounded"
-              />
-            </button>
+            
+            {/* GOOGLE TRANSLATE WIDGET FOR DESKTOP */}
+            <div id="google_translate_element_desktop" />
 
             <a
               href="#contacto"
@@ -156,32 +65,8 @@ export default function Header() {
             </a>
           </div>
 
-          {/* Mobile Menu Button & Language Toggle */}
           <div className="md:hidden flex items-center gap-3">
-            {/* Language Toggle Flag */}
-            <button
-              onClick={toggleLanguage}
-              className={`hover:scale-110 transition-all duration-200 flex items-center gap-2 ${
-                !googleTranslateReady ? 'opacity-50 cursor-wait' : 'opacity-100'
-              }`}
-              aria-label="Toggle language"
-              title={
-                !googleTranslateReady
-                  ? 'Loading translator...'
-                  : currentLang === 'es'
-                    ? 'Cambiar a Português'
-                    : 'Mudar para Español'
-              }
-              disabled={!googleTranslateReady}
-            >
-              <Image
-                src={currentLang === 'es' ? '/flag-br.svg' : '/flag-es.svg'}
-                alt={currentLang === 'es' ? 'Cambiar a Português' : 'Mudar para Español'}
-                width={24}
-                height={24}
-                className="rounded"
-              />
-            </button>
+            {/* Mobile menu button ONLY */}
 
             <button
               type="button"
@@ -202,7 +87,6 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         <div
           className={`md:hidden transition-all duration-300 ease-in-out ${
             mobileMenuOpen
@@ -211,6 +95,9 @@ export default function Header() {
           }`}
         >
           <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+            {/* MOBILE WIDGET IN MOBILE MENU */}
+            <div id="google_translate_element_desktop" className="px-3 py-2" />
+            
             <a
               href="#servicios"
               onClick={() => setMobileMenuOpen(false)}
