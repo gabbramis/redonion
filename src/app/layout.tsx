@@ -26,8 +26,6 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        <meta name="google" content="notranslate" />
-        <meta httpEquiv="content-language" content="es" />
         <style dangerouslySetInnerHTML={{
           __html: `
             /* COMPLETELY HIDE Google Translate UI - Keep it functional but invisible */
@@ -78,50 +76,11 @@ export default function RootLayout({
               display: none !important;
               visibility: hidden !important;
             }
-
-            /* Prevent Google Translate from breaking dynamic content */
-            input,
-            button,
-            textarea,
-            select {
-              font-family: inherit !important;
-            }
-
-            /* Prevent translation conflicts with animations */
-            .notranslate,
-            [translate="no"] {
-              -webkit-transform: translateZ(0);
-              transform: translateZ(0);
-            }
-
-            /* Force title to not translate */
-            title {
-              translate: no;
-            }
-          `
-        }} />
-        {/* Prevent title translation */}
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            (function() {
-              var originalTitle = 'RedOnion';
-              Object.defineProperty(document, 'title', {
-                get: function() {
-                  return originalTitle;
-                },
-                set: function(newTitle) {
-                  if (newTitle !== 'Cebola Roxa' && !newTitle.includes('Cebola')) {
-                    originalTitle = newTitle;
-                  }
-                }
-              });
-            })();
           `
         }} />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased notranslate`}
-        translate="no"
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {/* Hidden Google Translate widget - functional but invisible */}
         <div id="google_translate_element_desktop" aria-hidden="true" />
