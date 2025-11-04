@@ -1,5 +1,6 @@
 export const ADMIN_EMAILS = [
     'gabrielaramis01@gmail.com',
     'severobruno36@gmail.com',
-    'rominnazinola@gmail.com'
+    'rominnazinola@gmail.com',
+    'Kaulinfagundes@hotmail.com'
 ]
