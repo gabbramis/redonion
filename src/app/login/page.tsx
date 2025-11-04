@@ -127,8 +127,8 @@ function LoginForm() {
               className="object-contain mb-4"
             />
             <h1 className="text-3xl font-bold text-center mb-2">
-              <span className="text-red-500">Red</span>
-              <span className="text-gray-900 dark:text-white">Onion</span>
+              <span className="text-red-500" translate="no">Red</span>
+              <span className="text-gray-900 dark:text-white" translate="no">Onion</span>
             </h1>
             <p className="text-gray-600 dark:text-gray-400 text-center">
               Panel de Administración
@@ -145,7 +145,7 @@ function LoginForm() {
           >
             {/* Error message */}
             {error && (
-              <div className="p-3 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 rounded-lg text-sm">
+              <div className="p-3 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 rounded-lg text-sm notranslate">
                 {error}
               </div>
             )}
@@ -218,9 +218,10 @@ function LoginForm() {
               type="submit"
               disabled={loading}
               className="w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              key={loading ? "loading" : "idle"}
             >
               {loading ? (
-                <>
+                <span className="flex items-center notranslate">
                   <svg
                     className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                     xmlns="http://www.w3.org/2000/svg"
@@ -242,7 +243,7 @@ function LoginForm() {
                     ></path>
                   </svg>
                   Iniciando sesión...
-                </>
+                </span>
               ) : (
                 "Iniciar Sesión"
               )}
@@ -312,7 +313,7 @@ export default function LoginPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-600 to-orange-600">
-        <div className="text-white">Cargando...</div>
+        <div className="text-white notranslate">Cargando...</div>
       </div>
     }>
       <LoginForm />

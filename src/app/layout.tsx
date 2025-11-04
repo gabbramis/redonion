@@ -76,6 +76,21 @@ export default function RootLayout({
               display: none !important;
               visibility: hidden !important;
             }
+
+            /* Prevent Google Translate from breaking dynamic content */
+            input,
+            button,
+            textarea,
+            select {
+              font-family: inherit !important;
+            }
+
+            /* Prevent translation conflicts with animations */
+            .notranslate,
+            [translate="no"] {
+              -webkit-transform: translateZ(0);
+              transform: translateZ(0);
+            }
           `
         }} />
       </head>

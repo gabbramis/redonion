@@ -152,20 +152,20 @@ export default function AuthCallbackPage() {
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                 Error de autenticación
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 text-center mb-4">
+              <p className="text-gray-600 dark:text-gray-400 text-center mb-4 notranslate">
                 {error}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-500 notranslate">
                 Redirigiendo al inicio de sesión...
               </p>
             </>
           ) : (
             <>
               <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-red-600 mb-4"></div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 notranslate">
                 Verificando autenticación
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 text-center">
+              <p className="text-gray-600 dark:text-gray-400 text-center notranslate">
                 Por favor espera un momento...
               </p>
             </>
