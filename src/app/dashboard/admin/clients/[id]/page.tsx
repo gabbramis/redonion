@@ -73,10 +73,12 @@ export default function ManageClientPage() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
+      const userEmail = user?.email?.toLowerCase() || '';
+      const isAdmin = ADMIN_EMAILS.some(email => email.toLowerCase() === userEmail);
+
       if (
         !user ||
-        (!ADMIN_EMAILS.includes(user.email!) &&
-          user.user_metadata?.role !== "admin")
+        (!isAdmin && user.user_metadata?.role !== "admin")
       ) {
         router.push("/dashboard/admin");
         return;
