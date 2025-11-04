@@ -4,7 +4,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
-            <h3 className="text-red-500 font-bold text-2xl mb-4">RedOnion</h3>
+            <h3 className="text-red-500 font-bold text-2xl mb-4 notranslate">RedOnion</h3>
             <p className="text-sm">
               Agencia de marketing internacional que ofrece estrategias audaces y resultados medibles en todo el mundo.
             </p>
@@ -38,7 +38,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-gray-800 pt-8 text-sm text-center">
-          <p>&copy; 2025 RedOnion Agencia Internacional de Marketing. Todos los derechos reservados.</p>
+          <p>&copy; 2025  <span className="notranslate">RedOnion</span>  Agencia Internacional de Marketing. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>

@@ -28,11 +28,53 @@ export default function RootLayout({
       <head>
         <style dangerouslySetInnerHTML={{
           __html: `
-            .goog-te-banner-frame {
+            /* COMPLETELY HIDE Google Translate UI - Keep it functional but invisible */
+
+            /* Hide the banner frame completely */
+            .goog-te-banner-frame,
+            .goog-te-banner-frame.skiptranslate,
+            body > .skiptranslate,
+            iframe.goog-te-banner-frame,
+            .goog-te-banner-frame iframe {
               display: none !important;
+              visibility: hidden !important;
+              height: 0 !important;
+              opacity: 0 !important;
+              pointer-events: none !important;
+              position: absolute !important;
+              left: -9999px !important;
             }
+
+            /* Prevent body from being pushed down */
             body {
               top: 0 !important;
+              position: static !important;
+            }
+
+            /* Move Google Translate widget off-screen but keep it functional */
+            #google_translate_element_desktop,
+            #google_translate_element_mobile {
+              position: absolute !important;
+              left: -9999px !important;
+              top: -9999px !important;
+              width: 1px !important;
+              height: 1px !important;
+              overflow: hidden !important;
+              visibility: hidden !important;
+            }
+
+            /* Hide all Google Translate UI elements */
+            .goog-te-gadget,
+            .goog-te-combo,
+            .skiptranslate {
+              display: none !important;
+              visibility: hidden !important;
+            }
+
+            /* Hide the iframe that contains the floating widget */
+            iframe.skiptranslate {
+              display: none !important;
+              visibility: hidden !important;
             }
           `
         }} />
@@ -40,6 +82,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* Hidden Google Translate widget - functional but invisible */}
+        <div id="google_translate_element_desktop" aria-hidden="true" />
+
         {children}
 
         <Script
@@ -53,10 +98,12 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               window.googleTranslateElementInit = function() {
+                // Initialize Google Translate widget (hidden, but functional)
                 new google.translate.TranslateElement({
                   pageLanguage: 'es',
                   includedLanguages: 'es,pt',
-                  layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+                  layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                  autoDisplay: false
                 }, 'google_translate_element_desktop');
               };
             `
