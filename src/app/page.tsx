@@ -157,10 +157,10 @@ export default function Home() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-              ¿Por Qué Elegir RedOnion?
+              ¿Por Qué Elegir <span className="notranslate">RedOnion</span>?
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-              Ofrecemos soluciones de marketing integrales que impulsan el
+              Ofrecemos varias soluciones de marketing que impulsan el
               crecimiento y superan las expectativas
             </p>
           </motion.div>
@@ -993,7 +993,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-6 italic">
-                RedOnion transformó nuestra presencia de marca en Europa. Su
+                <span className="notranslate">RedOnion</span> transformó nuestra presencia de marca en Europa. Su
                 enfoque estratégico aumentó nuestra cuota de mercado un 45% en
                 solo 6 meses. ¡Trabajo excepcional!
               </p>
@@ -1034,7 +1034,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-6 italic">
-                Trabajar con RedOnion ha sido un cambio radical. La creatividad
+                Trabajar con <span className="notranslate">RedOnion</span> ha sido un cambio radical. La creatividad
                 de su equipo y el enfoque basado en datos entregaron campañas
                 que superaron todas nuestras expectativas.
               </p>
@@ -1075,7 +1075,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-6 italic">
-                El ROI que hemos visto de las campañas de RedOnion es increíble.
+                El ROI que hemos visto de las campañas de <span className="notranslate">RedOnion</span> es increíble.
                 Entienden los mercados internacionales como ninguna otra agencia
                 con la que hayamos trabajado.
               </p>
@@ -1119,7 +1119,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-xl text-red-50 mb-8 max-w-2xl mx-auto"
           >
-            Hablemos sobre cómo RedOnion puede ayudarte a alcanzar tus objetivos
+            Hablemos sobre cómo <span className="notranslate">RedOnion</span> puede ayudarte a alcanzar tus objetivos
             de marketing y dominar tu mercado.
           </motion.p>
           <motion.div

@@ -9,6 +9,7 @@ import { MastercardIcon } from "@/components/ui/icons/brandico-mastercard";
 import { initMercadoPago } from "@mercadopago/sdk-react";
 import { MercadoPagoSubscriptionScript } from "@/components/mercadopago-subscription-script";
 import { getMPSubscriptionPlan } from "@/lib/mercadopago-plans";
+import PixModal from "@/components/PixModal";
 
 interface Plan {
   id: string;
@@ -128,6 +129,7 @@ export default function ClientDashboard() {
   const [selectedExtras, setSelectedExtras] = useState<Set<string>>(new Set());
   const [cart, setCart] = useState<CartItem[]>([]);
   const [expandedPlans, setExpandedPlans] = useState<Set<string>>(new Set());
+  const [showPixModal, setShowPixModal] = useState(false);
   const supabase = createClient();
 
   // Update cart when billing changes
@@ -656,6 +658,21 @@ export default function ClientDashboard() {
                         )}
                       </button>
 
+                      {/* PIX Button */}
+                      <button
+                        onClick={() => setShowPixModal(true)}
+                        className="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Image
+                          src="/pix.png"
+                          alt="PIX"
+                          width={80}
+                          height={24}
+                          className="h-6 object-contain"
+                          unoptimized
+                        />
+                      </button>
+
                       {/* Credit Card Button (Disabled) */}
                       <button
                         disabled
@@ -697,6 +714,9 @@ export default function ClientDashboard() {
           </div>
         </div>
       </div>
+
+      {/* PIX Payment Modal */}
+      <PixModal isOpen={showPixModal} onClose={() => setShowPixModal(false)} />
     </>
   );
 }

@@ -51,7 +51,7 @@ export default function AdminSidebar({ userEmail }: AdminSidebarProps) {
     >
       {/* Logo Section */}
       <div className="px-6 py-6 border-b border-gray-200 dark:border-gray-700">
-        <Link href="/dashboard/admin" className="flex items-center gap-3">
+        <Link href="/dashboard/admin" className="flex items-center gap-3 notranslate">
           <Image
             src="/onion-logo.png"
             alt="RedOnion Logo"
@@ -61,7 +61,7 @@ export default function AdminSidebar({ userEmail }: AdminSidebarProps) {
             className="object-contain"
           />
           <div>
-            <h1 className="text-xl font-bold">
+            <h1 className="text-xl font-bold notranslate">
               <span className="text-red-500">Red</span>
               <span className="text-gray-900 dark:text-white">Onion</span>
             </h1>

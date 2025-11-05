@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RedOnion",
+  title: "RedOnion - Marketing Agency",
   description: "Agencia Internacional de Marketing",
 };
 
@@ -106,6 +106,48 @@ export default function RootLayout({
                   autoDisplay: false
                 }, 'google_translate_element_desktop');
               };
+            `
+          }}
+        />
+        <Script
+          id="title-protection"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var originalTitle = 'RedOnion - Marketing Agency';
+
+                // Set title immediately
+                document.title = originalTitle;
+
+                // Watch for title changes
+                var observer = new MutationObserver(function(mutations) {
+                  mutations.forEach(function(mutation) {
+                    var title = document.title;
+                    // If title was translated, restore it
+                    if (title.includes('Cebola') || title.includes('Roxa')) {
+                      document.title = originalTitle;
+                    }
+                  });
+                });
+
+                // Start observing
+                var titleElement = document.querySelector('title');
+                if (titleElement) {
+                  observer.observe(titleElement, {
+                    childList: true,
+                    characterData: true,
+                    subtree: true
+                  });
+                }
+
+                // Also check periodically
+                setInterval(function() {
+                  if (document.title.includes('Cebola') || document.title.includes('Roxa')) {
+                    document.title = originalTitle;
+                  }
+                }, 500);
+              })();
             `
           }}
         />

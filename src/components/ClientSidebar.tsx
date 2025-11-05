@@ -78,7 +78,7 @@ export default function ClientSidebar({ userEmail }: ClientSidebarProps) {
     >
       {/* Logo Section */}
       <div className="px-6 py-6 border-b border-gray-200 dark:border-gray-700">
-        <Link href="/dashboard/client/panel" className="flex items-center gap-3">
+        <Link href="/dashboard/client/panel" className="flex items-center gap-3 notranslate">
           <Image
             src="/onion-logo.png"
             alt="RedOnion Logo"
@@ -88,7 +88,7 @@ export default function ClientSidebar({ userEmail }: ClientSidebarProps) {
             className="object-contain"
           />
           <div>
-            <h1 className="text-xl font-bold">
+            <h1 className="text-xl font-bold notranslate">
               <span className="text-red-500">Red</span>
               <span className="text-gray-900 dark:text-white">Onion</span>
             </h1>
@@ -124,7 +124,7 @@ export default function ClientSidebar({ userEmail }: ClientSidebarProps) {
       <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700">
         <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700 rounded-lg mb-3">
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Cliente</p>
-          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+          <p className="text-sm font-medium text-gray-900 dark:text-white truncate notranslate">
             {userEmail}
           </p>
         </div>
