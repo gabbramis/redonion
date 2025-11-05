@@ -993,7 +993,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-6 italic">
-                <span className="notranslate">RedOnion</span> transformó nuestra presencia de marca en Europa. Su
+                <span className="notranslate">RedOnion</span> transformó nuestra presencia de marca. Su
                 enfoque estratégico aumentó nuestra cuota de mercado un 45% en
                 solo 6 meses. ¡Trabajo excepcional!
               </p>
