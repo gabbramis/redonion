@@ -101,7 +101,7 @@ export default function RootLayout({
                 // Initialize Google Translate widget (hidden, but functional)
                 new google.translate.TranslateElement({
                   pageLanguage: 'es',
-                  includedLanguages: 'es,pt',
+                  includedLanguages: 'es,pt,en',
                   layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
                   autoDisplay: false
                 }, 'google_translate_element_desktop');

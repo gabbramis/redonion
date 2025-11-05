@@ -1132,7 +1132,7 @@ export default function Home() {
             <motion.a
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              href="mailto:hello@redonion.com"
+              href="mailto:redonionservices@outlook.com"
               className="px-8 py-4 bg-white hover:bg-gray-100 text-red-600 font-semibold rounded-lg transition-colors duration-200 shadow-xl hover:shadow-2xl w-full sm:w-auto"
             >
               Agendar una Consulta
@@ -1140,7 +1140,7 @@ export default function Home() {
             <motion.a
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              href="tel:+1234567890"
+              href="tel:+598 97 809 036"
               className="px-8 py-4 bg-transparent hover:bg-red-700 text-white font-semibold rounded-lg border-2 border-white transition-colors duration-200 w-full sm:w-auto"
             >
               Llámanos Ahora

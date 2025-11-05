@@ -10,6 +10,7 @@ import { initMercadoPago } from "@mercadopago/sdk-react";
 import { MercadoPagoSubscriptionScript } from "@/components/mercadopago-subscription-script";
 import { getMPSubscriptionPlan } from "@/lib/mercadopago-plans";
 import PixModal from "@/components/PixModal";
+import ITransferModal from "@/components/ITransferModal";
 
 interface Plan {
   id: string;
@@ -130,6 +131,7 @@ export default function ClientDashboard() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [expandedPlans, setExpandedPlans] = useState<Set<string>>(new Set());
   const [showPixModal, setShowPixModal] = useState(false);
+  const [showITransferModal, setShowITransferModal] = useState(false);
   const supabase = createClient();
 
   // Update cart when billing changes
@@ -673,6 +675,16 @@ export default function ClientDashboard() {
                         />
                       </button>
 
+                      {/* iTransfer Button */}
+                      <button
+                        onClick={() => setShowITransferModal(true)}
+                        className="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                      >
+                        <span className="text-purple-600 dark:text-purple-400 font-semibold text-lg">
+                          iTransfer
+                        </span>
+                      </button>
+
                       {/* Credit Card Button (Disabled) */}
                       <button
                         disabled
@@ -717,6 +729,9 @@ export default function ClientDashboard() {
 
       {/* PIX Payment Modal */}
       <PixModal isOpen={showPixModal} onClose={() => setShowPixModal(false)} />
+
+      {/* iTransfer Payment Modal */}
+      <ITransferModal isOpen={showITransferModal} onClose={() => setShowITransferModal(false)} />
     </>
   );
 }

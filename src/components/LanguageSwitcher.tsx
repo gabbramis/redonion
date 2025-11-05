@@ -77,6 +77,25 @@ export default function LanguageSwitcher() {
           className="object-cover"
         />
       </button>
+
+      <button
+        onClick={() => changeLanguage("en")}
+        className={`relative w-8 h-8 rounded-full overflow-hidden transition-all duration-200 ${
+          currentLang === "en"
+            ? "ring-2 ring-red-600 scale-110"
+            : "opacity-70 hover:opacity-100 hover:scale-105"
+        }`}
+        aria-label="English"
+        title="English (Canada)"
+      >
+        <Image
+          src="/flag-ca.svg"
+          alt="English"
+          width={32}
+          height={32}
+          className="object-cover"
+        />
+      </button>
     </div>
   );
 }
