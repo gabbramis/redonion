@@ -613,7 +613,7 @@ export default function Home() {
               <li className="flex items-start text-red-600 dark:text-red-400 font-medium">
                 <span className="text-sm mr-1">+</span>
                 <span className="text-sm">
-                  SEO optimizado (+ $20)
+                  SEO optimizado (+ $50)
                 </span>
               </li>
             </ul>

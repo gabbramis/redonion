@@ -74,7 +74,7 @@ const plans: Plan[] = [
     annualPrice: 126.65,
     upgrade: {
       name: "SEO optimizado para mejorar posicionamiento en buscadores",
-      price: 20,
+      price: 50,
     },
   },
   {
