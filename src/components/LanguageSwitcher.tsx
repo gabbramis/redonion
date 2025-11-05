@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 
 export default function LanguageSwitcher() {
-  const [currentLang, setCurrentLang] = useState<string>("es");
+  const [currentLang, setCurrentLang] = useState<string>("en");
 
   useEffect(() => {
     // Check for existing language preference
@@ -15,7 +15,7 @@ export default function LanguageSwitcher() {
 
       if (googleCookie) {
         const lang = googleCookie.split("/")[2];
-        setCurrentLang(lang || "es");
+        setCurrentLang(lang || "en");
       }
     };
 

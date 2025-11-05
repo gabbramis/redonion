@@ -60,7 +60,7 @@ export default function ITransferModal({ isOpen, onClose }: ITransferModalProps)
                 {/* Message */}
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-6">
                   <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
-                    Thank you for your patience! Our agent will execute the payment on your behalf. Once the payment is processed and confirmed, your account will be activated automatically. We're here to make this smooth and easy for you.
+                    Thank you for your patience! Our agent will execute the payment on your behalf. Once the payment is processed and confirmed, your account will be activated automatically. We&apos;re here to make this smooth and easy for you.
                   </p>
                 </div>
 

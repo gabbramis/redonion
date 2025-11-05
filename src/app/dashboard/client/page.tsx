@@ -680,9 +680,13 @@ export default function ClientDashboard() {
                         onClick={() => setShowITransferModal(true)}
                         className="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
                       >
-                        <span className="text-purple-600 dark:text-purple-400 font-semibold text-lg">
-                          iTransfer
-                        </span>
+                        <Image
+                          src="/logo-itr.png"
+                          alt="iTransfer"
+                          width={100}
+                          height={30}
+                          className="h-6 object-contain"
+                        />
                       </button>
 
                       {/* Credit Card Button (Disabled) */}

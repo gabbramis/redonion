@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="en">
       <head>
         <style dangerouslySetInnerHTML={{
           __html: `
@@ -106,6 +106,29 @@ export default function RootLayout({
                   autoDisplay: false
                 }, 'google_translate_element_desktop');
               };
+            `
+          }}
+        />
+        <Script
+          id="auto-translate-english"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                // Check if user already has a language preference
+                var googleCookie = document.cookie
+                  .split('; ')
+                  .find(function(row) { return row.startsWith('googtrans='); });
+
+                // If no preference, set to English by default
+                if (!googleCookie) {
+                  var domain = window.location.hostname;
+                  document.cookie = 'googtrans=/es/en; path=/; domain=' + domain;
+                  document.cookie = 'googtrans=/es/en; path=/;';
+                  // Reload to apply translation
+                  window.location.reload();
+                }
+              })();
             `
           }}
         />
