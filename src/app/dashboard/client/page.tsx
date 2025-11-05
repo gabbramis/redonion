@@ -95,7 +95,7 @@ const plans: Plan[] = [
     annualPrice: 211.65,
     upgrade: {
       name: "Maximizador de tráfico pago: aumento de publicaciones diarias + campañas publicitarias gestionadas",
-      price: 50,
+      price: 99,
     },
   },
   {
@@ -118,7 +118,7 @@ const plans: Plan[] = [
     annualPrice: 551.65,
     upgrade: {
       name: "Publicidad con influencers locales seleccionados según tu público y nicho",
-      price: 250,
+      price: 380,
     },
   },
 ];

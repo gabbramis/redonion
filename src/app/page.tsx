@@ -106,7 +106,7 @@ export default function Home() {
               className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <h3 className="text-5xl font-bold text-red-600 dark:text-red-500 mb-2">
-                50+
+                30+
               </h3>
               <p className="text-gray-700 dark:text-gray-300 font-medium">
                 Países Atendidos
@@ -767,7 +767,7 @@ export default function Home() {
               <li className="flex items-start text-red-600 dark:text-red-400 font-medium">
                 <span className="text-sm mr-1">+</span>
                 <span className="text-sm">
-                  Maximizador de tráfico pago (+ $50)
+                  Maximizador de tráfico pago (+ $99)
                 </span>
               </li>
             </ul>
@@ -936,7 +936,7 @@ export default function Home() {
               <li className="flex items-start text-red-600 dark:text-red-400 font-medium">
                 <span className="text-sm mr-1">+</span>
                 <span className="text-sm">
-                  Publicidad con influencers (+ $250)
+                  Publicidad con influencers (+ $380)
                 </span>
               </li>
             </ul>
