@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
@@ -151,7 +151,11 @@ export default function ClientDashboard() {
               billing,
             };
           }
-          return item;
+          // Update billing for extras too
+          return {
+            ...item,
+            billing,
+          };
         });
         return newCart;
       });
@@ -203,8 +207,8 @@ export default function ClientDashboard() {
 
   const calculateTotal = () => {
     const total = cart.reduce((sum, item) => {
-      // For annual plans, multiply by 12 for display purposes only
-      if (item.billing === "annual" && item.type === "plan") {
+      // For annual billing, multiply by 12 for display purposes
+      if (item.billing === "annual") {
         return sum + (item.price * 12);
       }
       return sum + item.price;
@@ -409,36 +413,38 @@ export default function ClientDashboard() {
                   </div>
 
                   <div className="space-y-2 mb-4">
-                    {(expandedPlans.has(plan.id)
-                      ? plan.features
-                      : plan.features.slice(0, 3)
-                    ).map((feature, idx) => (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex items-start gap-2"
-                      >
-                        <svg
-                          className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                    <AnimatePresence>
+                      {(expandedPlans.has(plan.id)
+                        ? plan.features
+                        : plan.features.slice(0, 3)
+                      ).map((feature, idx) => (
+                        <motion.div
+                          key={`${plan.id}-${idx}`}
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="flex items-start gap-2"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
-                          {feature}
-                        </span>
-                      </motion.div>
-                    ))}
+                          <svg
+                            className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">
+                            {feature}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
 
                     {plan.features.length > 3 && (
                       <button
@@ -585,7 +591,7 @@ export default function ClientDashboard() {
                           </p>
                         </div>
                         <span className="font-semibold text-gray-900 dark:text-white">
-                          ${item.billing === "annual" && item.type === "plan"
+                          ${item.billing === "annual"
                             ? (item.price * 12).toFixed(2)
                             : item.price.toFixed(2)}
                         </span>
