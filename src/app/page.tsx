@@ -157,7 +157,7 @@ export default function Home() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-              ¿Por Qué Elegir <span className="notranslate">RedOnion</span>?
+              ¿Por Qué Elegirnos?
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
               Ofrecemos varias soluciones de marketing que impulsan el
