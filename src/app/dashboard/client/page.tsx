@@ -535,7 +535,7 @@ export default function ClientDashboard() {
                   </div>
 
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mb-4">
-                    <div className="flex items-center justify-between mb-2">
+                    <div key={`subtotal-${calculateTotal()}`} className="flex items-center justify-between mb-2">
                       <span className="text-gray-600 dark:text-gray-400">
                         Subtotal
                       </span>
@@ -543,7 +543,7 @@ export default function ClientDashboard() {
                         ${calculateTotal()}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between text-lg font-bold">
+                    <div key={`total-${calculateTotal()}-${billing}`} className="flex items-center justify-between text-lg font-bold">
                       <span className="text-gray-900 dark:text-white">
                         Total
                       </span>
