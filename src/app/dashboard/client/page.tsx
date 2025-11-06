@@ -413,38 +413,32 @@ export default function ClientDashboard() {
                   </div>
 
                   <div className="space-y-2 mb-4">
-                    <AnimatePresence>
-                      {(expandedPlans.has(plan.id)
-                        ? plan.features
-                        : plan.features.slice(0, 3)
-                      ).map((feature, idx) => (
-                        <motion.div
-                          key={`${plan.id}-${idx}`}
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="flex items-start gap-2"
+                    {(expandedPlans.has(plan.id)
+                      ? plan.features
+                      : plan.features.slice(0, 3)
+                    ).map((feature, idx) => (
+                      <div
+                        key={`${plan.id}-feature-${idx}`}
+                        className="flex items-start gap-2"
+                      >
+                        <svg
+                          className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          <svg
-                            className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">
-                            {feature}
-                          </span>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          {feature}
+                        </span>
+                      </div>
+                    ))}
 
                     {plan.features.length > 3 && (
                       <button
