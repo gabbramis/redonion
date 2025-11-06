@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
@@ -129,7 +129,6 @@ export default function ClientDashboard() {
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [selectedExtras, setSelectedExtras] = useState<Set<string>>(new Set());
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [expandedPlans, setExpandedPlans] = useState<Set<string>>(new Set());
   const [showPixModal, setShowPixModal] = useState(false);
   const [showITransferModal, setShowITransferModal] = useState(false);
   const supabase = createClient();
@@ -214,16 +213,6 @@ export default function ClientDashboard() {
       return sum + item.price;
     }, 0);
     return total.toFixed(2);
-  };
-
-  const toggleExpandPlan = (planId: string) => {
-    const newExpanded = new Set(expandedPlans);
-    if (newExpanded.has(planId)) {
-      newExpanded.delete(planId);
-    } else {
-      newExpanded.add(planId);
-    }
-    setExpandedPlans(newExpanded);
   };
 
   const handleProceedToPayment = async () => {
@@ -413,10 +402,7 @@ export default function ClientDashboard() {
                   </div>
 
                   <div className="space-y-2 mb-4">
-                    {(expandedPlans.has(plan.id)
-                      ? plan.features
-                      : plan.features.slice(0, 3)
-                    ).map((feature, idx) => (
+                    {plan.features.map((feature, idx) => (
                       <div
                         key={`${plan.id}-feature-${idx}`}
                         className="flex items-start gap-2"
@@ -439,53 +425,6 @@ export default function ClientDashboard() {
                         </span>
                       </div>
                     ))}
-
-                    {plan.features.length > 3 && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleExpandPlan(plan.id);
-                        }}
-                        className="text-xs text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400 font-medium mt-2 flex items-center gap-1 transition-colors"
-                      >
-                        {expandedPlans.has(plan.id) ? (
-                          <>
-                            Ver menos
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M5 15l7-7 7 7"
-                              />
-                            </svg>
-                          </>
-                        ) : (
-                          <>
-                            Ver más ({plan.features.length - 3} características
-                            más)
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 9l-7 7-7-7"
-                              />
-                            </svg>
-                          </>
-                        )}
-                      </button>
-                    )}
                   </div>
                 </motion.div>
               ))}
@@ -494,6 +433,7 @@ export default function ClientDashboard() {
             {/* Extras Section */}
             {selectedPlan && selectedPlan.upgrade && (
               <motion.div
+                key={`extras-${selectedPlan.id}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -540,6 +480,7 @@ export default function ClientDashboard() {
           {/* Cart Sidebar */}
           <div className="lg:col-span-1">
             <motion.div
+              key={`cart-${cart.length}-${billing}`}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
