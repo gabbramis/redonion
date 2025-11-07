@@ -258,7 +258,7 @@ export default function SubscriptionPage() {
               <p className="text-2xl font-bold">
                 ${subscription.price.toFixed(2)}
               </p>
-              <p className="text-xs text-red-100">{subscription.currency}</p>
+              <p className="text-xs text-red-100">USD</p>
             </div>
 
             <div className="bg-white/10 rounded-lg p-4">
